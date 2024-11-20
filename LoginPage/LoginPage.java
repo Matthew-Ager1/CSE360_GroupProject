@@ -3,6 +3,11 @@ package LoginPage;
 import Core.Navigation;
 import Database.UsersAPI;
 import Database.Models.User;
+import AccountCreation.RegistrationPage;
+import HomePage.AdminHomePage;
+import HomePage.InstructorHomePage;
+import HomePage.UserHomePage;
+import HomePage.RoleSelection;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,48 +17,68 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class LoginPage {
     public static void RegisterWithNavigation() {
-    	// Create a label for the page title
         Label titleLabel = new Label("Welcome, Please Log In");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        // Username field
         TextField usernameField = new TextField();
         usernameField.setPromptText("Enter username");
         usernameField.setMaxWidth(200);
 
-        // Password field
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter password");
         passwordField.setMaxWidth(200);
 
-        // Login button with improved styling
         Button loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;");
         loginButton.setPadding(new Insets(10, 20, 10, 20));
         loginButton.setOnAction((ActionEvent event) -> {
             String username = usernameField.getText();
             String password = passwordField.getText();
-            
-            // Add database logic
+
             if (UsersAPI.isValidLogin(username, password)) {
-            	Navigation.navigateTo("RoleSelection");
+                User loggedInUser = UsersAPI.getUser(username);
+                if (loggedInUser != null) {
+                    System.out.println("User retrieved: " + loggedInUser.getName());
+                    // Redirect to RoleSelection page
+                    RoleSelection.RegisterWithNavigation(loggedInUser);
+                    Navigation.navigateTo("RoleSelection");
+                } else {
+                    System.out.println("Failed to retrieve User");
+                }
+            } else {
+                System.out.println("Login failed, redirecting to RegistrationPage");
+                RegistrationPage.show(Navigation.getPrimaryStage(), username, password);
             }
-            
-            
         });
 
-        // Layout adjustments
-        VBox layout = new VBox(15);  // Increased spacing between elements
-        layout.setPadding(new Insets(20));  // Add padding around the layout
-        layout.setAlignment(Pos.CENTER);  // Center the elements
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(titleLabel, usernameField, passwordField, loginButton);
-    	
+
         Scene scene = new Scene(layout, 350, 250);
-    	
-    	Navigation.registerScene("LoginPage", scene);
+        Navigation.registerScene("LoginPage", scene);
+    }
+
+    public static void handleRoleBasedNavigation(User user) {
+        String highestRole = user.getRoles().stream().max(String::compareTo).orElse("student");
+
+        switch (highestRole) {
+            case "admin":
+                AdminHomePage.RegisterWithNavigation(user);
+                Navigation.navigateTo("AdminHomePage");  // Ensure this matches the registration in AdminHomePage
+                break;
+            case "instructor":
+                InstructorHomePage.RegisterWithNavigation(user);
+                Navigation.navigateTo("InstructorHomePage");
+                break;
+            default:
+                UserHomePage.RegisterWithNavigation(user);
+                Navigation.navigateTo("UserHomePage");
+                break;
+        }
     }
 }

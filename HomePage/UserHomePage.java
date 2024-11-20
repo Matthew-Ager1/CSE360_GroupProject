@@ -12,9 +12,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
 public class UserHomePage {
-	public static void RegisterWithNavigation(User user) {
+    public static void RegisterWithNavigation(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
         // Title Label
-        Label titleLabel = new Label("Welcome User " + user.getName() + "!");
+        Label titleLabel = new Label("Welcome " + user.getName() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         titleLabel.setAlignment(Pos.CENTER);
 
@@ -59,7 +63,7 @@ public class UserHomePage {
 
         // Scene Setup
         Scene scene = new Scene(mainLayout, 600, 400);
-        Navigation.registerScene("UserHome", scene);
+        Navigation.registerScene("UserHomePage", scene);
 
         // Register search results page
         SearchResultPage.RegisterWithNavigation("Welcome");

@@ -11,16 +11,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import HomePage.*;
 
 public class AdminHomePage {
-	public static void RegisterWithNavigation(User user) {
-		
+    public static void RegisterWithNavigation(User user) {
         // Title Label
         Label titleLabel = new Label("Welcome Admin " + user.getName() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         titleLabel.setAlignment(Pos.CENTER);
-        
-        // Topic Seach Title
+
+        // Topic Search Title
         Label searchLabel = new Label("Search Topic: ");
         searchLabel.setStyle("-fx-font-size: 24px;");
         searchLabel.setAlignment(Pos.CENTER);
@@ -29,14 +29,14 @@ public class AdminHomePage {
         TextField searchField = new TextField();
         searchField.setPromptText("Search...");
         searchField.setPrefWidth(250);
-        
+
         // Admin Panel (WIP)
         Button adminPanel = new Button("Admin Panel");
         adminPanel.setStyle("-fx-background-color: #ff3232;  -fx-text-fill: white;");
         adminPanel.setPadding(new Insets(10, 20, 10, 20));
         adminPanel.setOnAction((ActionEvent event) -> {
             // Open Admin Panel
-        	System.out.println("OPEN ADMIN PANEL");
+            Navigation.navigateTo("AdminPanel");
         });
 
         // Logout Button
@@ -61,7 +61,6 @@ public class AdminHomePage {
 
         // Scene Setup
         Scene scene = new Scene(mainLayout, 600, 400);
-        
-        Navigation.registerScene("AdminHome", scene);
-	}
+        Navigation.registerScene("AdminHomePage", scene); 
+    }
 }

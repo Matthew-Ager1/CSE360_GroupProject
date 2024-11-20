@@ -1,13 +1,21 @@
 package AccountCreation;
 
+import Core.Navigation;
+import Database.Models.User;
+import Database.UsersAPI;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegistrationPage {
-	public static void show(Stage primaryStage, String username, String password) {
+    public static void show(Stage primaryStage, String username, String password) {
         Label emailLabel = new Label("Email:");
         Label firstNameLabel = new Label("First Name:");
         Label middleNameLabel = new Label("Middle Name:");
@@ -45,7 +53,18 @@ public class RegistrationPage {
                 user.setName(firstName + " " + middleName + " " + lastName);
                 user.setPassword(password);
                 user.setUsername(username);
+                
+                List<String> roles = new ArrayList<>();
+                if (UsersAPI.getAllUsers().isEmpty()) {
+                    roles.add("admin"); // First user becomes admin
+                } else {
+                    roles.add("user"); // Default role for subsequent users
+                }
+                user.setRoles(roles);
+
                 UsersAPI.addUser(user);
+                // Navigate back to login or next logical page
+                Navigation.navigateTo("LoginPage");
             }
         });
 
@@ -68,7 +87,7 @@ public class RegistrationPage {
         grid.add(submitButton, 1, 5);
 
         Scene scene = new Scene(grid, 400, 350);
-
-    	Navigation.registerScene("LoginPage", scene);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }

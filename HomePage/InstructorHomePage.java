@@ -62,6 +62,6 @@ public class InstructorHomePage {
         // Scene Setup
         Scene scene = new Scene(mainLayout, 600, 400);
         
-        Navigation.registerScene("InstructorHome", scene);
+        Navigation.registerScene("InstructorHomePage", scene);
 	}
 }

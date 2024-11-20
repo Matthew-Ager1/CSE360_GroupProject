@@ -1,16 +1,22 @@
 package Core;
 
-import java.util.*;
-import javafx.stage.*;
-import javafx.scene.*;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Navigation {
-	private static Stage primaryStage;
-    private static final HashMap<String, Scene> scenes = new HashMap<>();
+    private static Stage primaryStage;
+    private static final Map<String, Scene> scenes = new HashMap<>();
 
     // Set the primary stage (typically called once from your main application)
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
+    }
+
+    // Get the primary stage
+    public static Stage getPrimaryStage() {
+        return primaryStage;
     }
 
     // Register a scene with a name for easy retrieval

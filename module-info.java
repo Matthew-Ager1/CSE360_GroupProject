@@ -12,4 +12,6 @@ module CSE360_GroupProject {
 	requires jbcrypt;
 	requires org.mongodb.bson;
 	requires javafx.base;
+
+	exports Core;
 }
