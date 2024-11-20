@@ -2,17 +2,14 @@ package LoginPage;
 
 import Core.Navigation;
 import Database.UsersAPI;
+import Database.Models.Role;
 import Database.Models.User;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class LoginPage {
     public static void RegisterWithNavigation() {
@@ -38,12 +35,40 @@ public class LoginPage {
             String username = usernameField.getText();
             String password = passwordField.getText();
             
+            // Validate inputs
+            if (username.isEmpty() || password.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter both username and password.", ButtonType.OK);
+                alert.showAndWait();
+                return;
+            }
+
             // Add database logic
             if (UsersAPI.isValidLogin(username, password)) {
-            	Navigation.navigateTo("RoleSelection");
+            	User user = UsersAPI.getUserByUsername(username);
+            	if (user != null) {
+            	    switch (user.getRole()) {
+            	        case ADMIN:
+            	            Navigation.navigateTo("AdminHomePage");
+            	            break;
+            	        case INSTRUCTOR:
+            	            Navigation.navigateTo("InstructorHomePage");
+            	            break;
+            	        case STUDENT:
+            	            Navigation.navigateTo("StudentHomePage");
+            	            break;
+            	        default:
+            	            Alert alert = new Alert(Alert.AlertType.ERROR, "Unknown user role.", ButtonType.OK);
+            	            alert.showAndWait();
+            	            break;
+            	    }
+            	} else {
+            	    Alert alert = new Alert(Alert.AlertType.ERROR, "User not found.", ButtonType.OK);
+            	    alert.showAndWait();
+            	}
+            } else {
+            	Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid username or password.", ButtonType.OK);
+            	alert.showAndWait();
             }
-            
-            
         });
 
         // Layout adjustments

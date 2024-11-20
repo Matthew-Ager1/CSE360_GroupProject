@@ -14,7 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 public class RoleSelection {
-	public static void RegisterWithNavigation(User user) {
+	/*public static void RegisterWithNavigation(User user) {
 		
 		// For testing purposes, uncomment one of these lines
 		// Default User
@@ -33,7 +33,7 @@ public class RoleSelection {
 		ObservableList<String> options = FXCollections.observableArrayList();
 		
 		// Role Selection
-		if (user.getPerms() == 0) {
+		if (user.getRole() == 0) {
 			// Default
 			UserHomePage.RegisterWithNavigation(user);
 		} 
@@ -93,5 +93,5 @@ public class RoleSelection {
 		Scene scene = new Scene(layout, 350, 250);
 		Navigation.registerScene("RoleSelection", scene);
 		
-	}
+	}*/
 }
