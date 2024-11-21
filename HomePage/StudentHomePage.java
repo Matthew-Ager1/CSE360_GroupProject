@@ -11,7 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
-public class UserHomePage {
+public class StudentHomePage {
     public static void RegisterWithNavigation(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
@@ -63,7 +63,7 @@ public class UserHomePage {
 
         // Scene Setup
         Scene scene = new Scene(mainLayout, 600, 400);
-        Navigation.registerScene("UserHomePage", scene);
+        Navigation.registerScene("StudentHomePage", scene); // Correct registration
 
         // Register search results page
         SearchResultPage.RegisterWithNavigation("Welcome");

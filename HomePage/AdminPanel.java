@@ -2,8 +2,8 @@ package HomePage;
 
 import Core.Navigation;
 import Database.Models.User;
-import Database.Models.Article;
-import javafx.event.ActionEvent;
+import Database.Models.Article; // Import Article
+import Database.UsersAPI;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,55 +12,90 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Arrays;
 
 public class AdminPanel {
     public static void RegisterWithNavigation() {
+        // Title Label
         Label titleLabel = new Label("Admin Panel");
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
+        // List Users Button
         Button listUsersButton = new Button("List Users");
-        listUsersButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;");
-        listUsersButton.setPadding(new Insets(10, 20, 10, 20));
-        listUsersButton.setOnAction((ActionEvent event) -> {
+        listUsersButton.setMaxWidth(Double.MAX_VALUE);
+        listUsersButton.setOnAction(e -> {
             List<User> users = fetchUsersFromDatabase();
-            UserManagementPage.RegisterWithNavigation(users);
-            Navigation.navigateTo("UserManagementPage");
+            ManageUsersPage.RegisterWithNavigation(users);  // Pass the list of users
+            Navigation.navigateTo("ManageUsersPage");
         });
 
+        // List Articles Button
         Button listArticlesButton = new Button("List Articles");
-        listArticlesButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;");
-        listArticlesButton.setPadding(new Insets(10, 20, 10, 20));
-        listArticlesButton.setOnAction((ActionEvent event) -> {
+        listArticlesButton.setMaxWidth(Double.MAX_VALUE);
+        listArticlesButton.setOnAction(e -> {
             List<Article> articles = fetchArticlesFromDatabase();
             displayArticles(articles);
         });
 
-        VBox layout = new VBox(15);
+        // Backup Articles Button
+        Button backupArticlesButton = new Button("Backup Articles");
+        backupArticlesButton.setMaxWidth(Double.MAX_VALUE);
+        backupArticlesButton.setOnAction(e -> {
+            Navigation.navigateTo("BackupArticlesPage");
+        });
+
+        // Restore Articles Button
+        Button restoreArticlesButton = new Button("Restore Articles");
+        restoreArticlesButton.setMaxWidth(Double.MAX_VALUE);
+        restoreArticlesButton.setOnAction(e -> {
+            Navigation.navigateTo("RestoreArticlesPage");
+        });
+
+        // Back Button
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white;");
+        backButton.setMaxWidth(Double.MAX_VALUE);
+        backButton.setOnAction(e -> {
+            Navigation.navigateTo("AdminHomePage");
+        });
+
+        // Logout Button
+        Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+        logoutButton.setMaxWidth(Double.MAX_VALUE);
+        logoutButton.setOnAction(e -> {
+            Navigation.navigateTo("LoginPage");
+        });
+
+        // Layout
+        VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(titleLabel, listUsersButton, listArticlesButton);
+        layout.getChildren().addAll(
+                titleLabel,
+                listUsersButton,
+                listArticlesButton,
+                backupArticlesButton,
+                restoreArticlesButton,
+                backButton,  // Add back button here
+                logoutButton
+        );
 
-        Scene scene = new Scene(layout, 350, 250);
+        Scene scene = new Scene(layout, 400, 400);
         Navigation.registerScene("AdminPanel", scene);
     }
 
     private static List<User> fetchUsersFromDatabase() {
-        // Placeholder for fetching users from database
-        return Arrays.asList(
-                new User("1", "Admin", "admin@example.com", "password", true, 1, Arrays.asList("admin", "instructor")),
-                new User("2", "Instructor", "instructor@example.com", "password", true, 2, Arrays.asList("instructor"))
-        );
+        return UsersAPI.getAllUsers();  // Fetch all users from the database
     }
 
     private static List<Article> fetchArticlesFromDatabase() {
-        // Placeholder for fetching articles from database
-        return Arrays.asList(new Article(1L, "Beginner", Arrays.asList("Group 1"), true, "Article 1", "Short Description 1", Arrays.asList("keyword1", "keyword2"), "Body of Article 1", Arrays.asList("link1"), "Non-sensitive Title 1", "Non-sensitive Description 1"));
+        return Arrays.asList(
+                new Article(1L, "Beginner", Arrays.asList("Group 1"), true, "Article 1", "Short Description 1", Arrays.asList("keyword1", "keyword2"), "Body of Article 1", Arrays.asList("link1"), "Non-sensitive Title 1", "Non-sensitive Description 1")
+        );
     }
 
     private static void displayArticles(List<Article> articles) {
-        // Placeholder for displaying articles
         articles.forEach(article -> System.out.println(article.getTitle() + " - " + article.getBody()));
     }
 }

@@ -11,22 +11,24 @@ public class User {
     private String email;
     private String username;
     private String password;
-    private String name; // Assuming 'name' is a simple String
+    private String name;
     private boolean onePass;
     private int expire;
-    private List<String> roles;
+    private Role role; // New field for user roles
+    private List<String> groups; // List of group IDs the user belongs to
 
     // Constructors
     public User() {}
 
-    public User(String email, String username, String password, String name, boolean onePass, int expire, List<String> roles) {
+    public User(String email, String username, String password, String name, boolean onePass, int expire, Role role, List<String> groups) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.name = name;
         this.onePass = onePass;
         this.expire = expire;
-        this.roles = roles;
+        this.role = role;
+        this.groups = groups;
     }
 
     // Getters and Setters
@@ -41,31 +43,31 @@ public class User {
     public String getEmail() {
         return email;
     }
-
+    
     public void setEmail(String email) {
         this.email = email;
     }
-
+    
     public String getUsername() {
         return username;
     }
-
+    
     public void setUsername(String username) {
         this.username = username;
     }
-
+    
     public String getPassword() {
         return password;
     }
-
+    
     public void setPassword(String password) {
         this.password = password;
     }
-
+    
     public String getName() {
         return name;
     }
-
+    
     public void setName(String name) {
         this.name = name;
     }
@@ -86,11 +88,23 @@ public class User {
         this.expire = expire;
     }
 
-    public List<String> getRoles() {
-        return roles;
+    public Role getRole() {
+    	if (role == null) {
+    		return Role.STUDENT;
+    	}
+        return role;
     }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
     }
 }
+
