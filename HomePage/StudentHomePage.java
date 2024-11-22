@@ -18,7 +18,7 @@ public class StudentHomePage {
         }
 
         // Title Label
-        Label titleLabel = new Label("Welcome " + user.getName() + "!");
+        Label titleLabel = new Label("Welcome " + user.getUsername() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         titleLabel.setAlignment(Pos.CENTER);
 
@@ -38,7 +38,7 @@ public class StudentHomePage {
             String query = searchField.getText();
             if (!query.isEmpty()) {
                 SearchResultPage.RegisterWithNavigation(query);
-                Navigation.navigateTo("SearchResultPage");
+                Navigation.navigateTo("ArticleSearchPage");
             }
         });
 

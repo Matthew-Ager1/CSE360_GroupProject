@@ -33,8 +33,7 @@ public class AdminPanel {
         Button listArticlesButton = new Button("List Articles");
         listArticlesButton.setMaxWidth(Double.MAX_VALUE);
         listArticlesButton.setOnAction(e -> {
-            List<Article> articles = fetchArticlesFromDatabase();
-            displayArticles(articles);
+            Navigation.navigateTo("ManageArticlesPage");
         });
 
         // Backup Articles Button

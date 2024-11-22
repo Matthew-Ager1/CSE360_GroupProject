@@ -3,7 +3,6 @@ package HomePage;
 import Core.Navigation;
 import Database.GroupsAPI;
 import Database.UsersAPI;
-import Database.Models.Group;
 import Database.Models.Role;
 import Database.Models.User;
 import javafx.collections.FXCollections;
@@ -16,10 +15,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class ManageUsersPage {
+
     public static void RegisterWithNavigation(List<User> users) {
         // Title
         Label titleLabel = new Label("Manage Users");
@@ -91,7 +93,7 @@ public class ManageUsersPage {
     private static void refreshUsersList(ListView<String> usersListView, List<User> users) {
         ObservableList<String> userStrings = FXCollections.observableArrayList();
         for (User user : users) {
-            userStrings.add(user.getUsername() + " - " + user.getRole().toString());
+            userStrings.add(user.getUsername() + " - " + user.getRoles());
         }
         usersListView.setItems(userStrings);
     }
@@ -147,7 +149,10 @@ public class ManageUsersPage {
                     return null;
                 }
 
-                return new User(email, username, password, name, false, 0, role, new ArrayList<>());
+                // Use correct constructor with Set<Role>
+                Set<Role> roles = new HashSet<>();
+                roles.add(role);
+                return new User(email, username, password, name, false, 0, roles, new ArrayList<>());
             }
             return null;
         });
@@ -183,9 +188,10 @@ public class ManageUsersPage {
         CheckBox studentCheckBox = new CheckBox("Student");
 
         // Set selected based on current roles
-        adminCheckBox.setSelected(user.getRole() == Role.ADMIN);
-        instructorCheckBox.setSelected(user.getRole() == Role.INSTRUCTOR);
-        studentCheckBox.setSelected(user.getRole() == Role.STUDENT);
+        Set<Role> roles = user.getRoles();
+        adminCheckBox.setSelected(roles.contains(Role.ADMIN));
+        instructorCheckBox.setSelected(roles.contains(Role.INSTRUCTOR));
+        studentCheckBox.setSelected(roles.contains(Role.STUDENT));
 
         // Layout
         VBox content = new VBox(10);
@@ -199,7 +205,7 @@ public class ManageUsersPage {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
-                List<Role> newRoles = new ArrayList<>();
+                Set<Role> newRoles = new HashSet<>();
                 if (adminCheckBox.isSelected()) {
                     newRoles.add(Role.ADMIN);
                 }
@@ -240,3 +246,4 @@ public class ManageUsersPage {
         alert.showAndWait();
     }
 }
+

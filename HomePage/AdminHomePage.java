@@ -11,6 +11,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import Articles.ArticleSearchPage;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 public class AdminHomePage {
     public static void RegisterWithNavigation(User user) {
@@ -19,7 +23,7 @@ public class AdminHomePage {
         }
 
         // Title Label
-        Label titleLabel = new Label("Welcome " + user.getName() + "!");
+        Label titleLabel = new Label("Welcome " + user.getUsername() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         titleLabel.setAlignment(Pos.CENTER);
 
@@ -36,10 +40,14 @@ public class AdminHomePage {
         // Search Button
         Button searchButton = new Button("Search");
         searchButton.setOnAction(event -> {
-            String query = searchField.getText();
+            String query = searchField.getText().trim();
             if (!query.isEmpty()) {
-                SearchResultPage.RegisterWithNavigation(query);
-                Navigation.navigateTo("SearchResultPage");
+                // Register the search query and navigate to ArticleSearchPage
+                ArticleSearchPage.RegisterWithNavigation(query);
+                Navigation.navigateTo("ArticleSearchPage");
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter a search query.", ButtonType.OK);
+                alert.showAndWait();
             }
         });
 

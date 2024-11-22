@@ -11,7 +11,9 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UsersAPI {
     private static final MongoDatabase database = DatabaseUtil.getDatabase();
@@ -20,7 +22,6 @@ public class UsersAPI {
     // Method to add a new user with role and group memberships
     public static Boolean addUser(User user) {
         try {
-            // Check if username or email already exists
             if (usernameExists(user.getUsername()) || emailExists(user.getEmail())) {
                 System.out.println("User with the same username or email already exists.");
                 return false;
@@ -50,7 +51,6 @@ public class UsersAPI {
             Document userDoc = getUserDocumentByUsername(username);
             if (userDoc != null) {
                 String storedHashedPassword = userDoc.getString("password");
-                // Verify the password
                 return PasswordUtil.verifyPassword(password, storedHashedPassword);
             }
         } catch (Exception e) {
@@ -111,36 +111,11 @@ public class UsersAPI {
         return false;
     }
 
-    // Method to retrieve users by group
-    public static List<User> getUsersByGroup(String groupName) {
-        List<User> users = new ArrayList<>();
-        try {
-            Bson filter = Filters.in("groups", groupName);
-            for (Document doc : usersCollection.find(filter)) {
-                users.add(documentToUser(doc));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return users;
-    }
-
-    // Method to delete a user by username
-    public static Boolean deleteUserByUsername(String username) {
-        try {
-            usersCollection.deleteOne(new Document("username", username));
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     // Method to update a user's roles
-    public static Boolean updateUserRoles(String username, List<Role> newRoles) {
+    public static Boolean updateUserRoles(String username, Set<Role> newRoles) {
         try {
             Bson filter = Filters.eq("username", username);
-            Bson update = Updates.set("role", newRoles.toString());
+            Bson update = Updates.set("roles", new ArrayList<>(newRoles));
             usersCollection.updateOne(filter, update);
             return true;
         } catch (Exception e) {
@@ -150,11 +125,9 @@ public class UsersAPI {
     }
 
     // Private helper methods
-
     private static Boolean usernameExists(String username) {
         try {
-            Document userDoc = usersCollection.find(new Document("username", username)).first();
-            return userDoc != null;
+            return usersCollection.find(new Document("username", username)).first() != null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -163,8 +136,7 @@ public class UsersAPI {
 
     private static Boolean emailExists(String email) {
         try {
-            Document userDoc = usersCollection.find(new Document("email", email)).first();
-            return userDoc != null;
+            return usersCollection.find(new Document("email", email)).first() != null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,23 +161,46 @@ public class UsersAPI {
         user.setName(doc.getString("name"));
         user.setOnePass(doc.getBoolean("onePass", false));
         user.setExpire(doc.getInteger("expire", 0));
-        String roleStr = doc.getString("role");
-        if (roleStr != null) {
-            user.setRole(Role.valueOf(roleStr));
+
+        List<String> rolesList = doc.getList("roles", String.class);
+        Set<Role> roles = new HashSet<>();
+        if (rolesList != null) {
+            for (String roleStr : rolesList) {
+                try {
+                    // Convert role to enum (case insensitive)
+                    roles.add(Role.valueOf(roleStr.toUpperCase()));  // Ensure uppercase for consistency
+                } catch (IllegalArgumentException e) {
+                    // Handle invalid roles, e.g., log or set to default
+                    System.out.println("Invalid role in database: " + roleStr);
+                    // Optionally, you could assign a default role here:
+                    // roles.add(Role.STUDENT);
+                }
+            }
         }
-        user.setGroups((List<String>) doc.get("groups"));
+        user.setRoles(roles);
+
+        user.setGroups(doc.getList("groups", String.class));
         return user;
     }
 
     private static Document userToDocument(User user) {
-        Document userDoc = new Document("email", user.getEmail())
+        return new Document("email", user.getEmail())
                 .append("username", user.getUsername())
                 .append("password", user.getPassword())
                 .append("name", user.getName())
                 .append("onePass", user.isOnePass())
                 .append("expire", user.getExpire())
-                .append("role", user.getRole().toString())
+                .append("roles", new ArrayList<>(user.getRoles()))
                 .append("groups", user.getGroups());
-        return userDoc;
     }
+    public static Boolean deleteUserByUsername(String username) {
+        try {
+            usersCollection.deleteOne(Filters.eq("username", username));
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

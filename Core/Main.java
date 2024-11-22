@@ -7,11 +7,10 @@ import Articles.ArticleSearchPage;
 import Articles.ArticlesListPage;
 import HomePage.*;
 import LoginPage.LoginPage;
-import Database.Models.User;
-import Database.Models.Role;
 import Database.UsersAPI; // Import UsersAPI
 import java.util.concurrent.ExecutionException;
 import java.util.List;
+import Database.Models.*;
 
 public class Main extends Application {
 
@@ -26,21 +25,11 @@ public class Main extends Application {
         // Register pages
         LoginPage.RegisterWithNavigation();
 
-        // Placeholder user for development/testing
-        User placeholderUser = new User();
-        placeholderUser.setUsername("placeholder");
-        placeholderUser.setName("Placeholder User");
-        placeholderUser.setRole(Role.ADMIN);
-
-        // Register StudentHomePage and AdminHomePage with a user object
-        StudentHomePage.RegisterWithNavigation(placeholderUser);
-        AdminHomePage.RegisterWithNavigation(placeholderUser); // Pass the user object
-
         // Fetch users from the database
         List<User> users = UsersAPI.getAllUsers();
         ManageUsersPage.RegisterWithNavigation(users); // Pass the list of users
 
-        // Other page registrations...
+        // Register other pages...
         try {
             ArticlesListPage.RegisterWithNavigation();
         } catch (InterruptedException | ExecutionException e) {
@@ -48,17 +37,18 @@ public class Main extends Application {
         }
         ArticleDetailsPage.RegisterWithNavigation();
         try {
-            ArticleSearchPage.RegisterWithNavigation();
-        } catch (InterruptedException | ExecutionException e) {
+            ArticleSearchPage.RegisterWithNavigation("Welcome");
+        } catch (Exception e) { // Catch only relevant exceptions or remove the block if unnecessary
             e.printStackTrace();
         }
 
+
         ManageArticlesPage.RegisterWithNavigation();
         ManageGroupsPage.RegisterWithNavigation();
-        InstructorHomePage.RegisterWithNavigation();
+        InstructorHomePage.RegisterWithNavigation(null); // Pass null for now, user will be passed on login
         AdminPanel.RegisterWithNavigation();
 
-        Navigation.navigateTo("LoginPage"); // Open to LoginPage first
+        // Navigate to the LoginPage first
+        Navigation.navigateTo("LoginPage");
     }
 }
-
