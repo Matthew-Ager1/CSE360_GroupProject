@@ -19,43 +19,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class ArticleSearchPage {
-    public static void RegisterWithNavigation() throws InterruptedException, ExecutionException {
+
+    public static void RegisterWithNavigation(String query) {
         // Title Label
-        Label titleLabel = new Label("Search Articles");
+        Label titleLabel = new Label("Search Results for: " + query);
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        // Search Field
-        TextField searchField = new TextField();
+        // Search Field (pre-filled with the query, not editable)
+        TextField searchField = new TextField(query);
         searchField.setPromptText("Enter article title");
         searchField.setMaxWidth(300);
-        
+        searchField.setDisable(false);
+
+        // TableView for displaying articles
         TableView<Article> tableView = new TableView<>();
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        
-        // Search Button
-        Button searchButton = new Button("Search");
-        searchButton.setOnAction((ActionEvent event) -> {
-            String query = searchField.getText().trim().toLowerCase();
-            List<Article> allArticles = null;
-			try {
-				allArticles = ArticlesAPI.listArticlesAsync().get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            List<Article> filtered = allArticles.stream()
-                    .filter(article -> article.getTitle().toLowerCase().contains(query))
-                    .collect(Collectors.toList());
-            tableView.setItems(FXCollections.observableArrayList(filtered));
-        });
+        tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY); // Use this instead of the deprecated one
 
-        // TableView Setup
-        
-
-        // Define Columns
+        // TableView Columns
         TableColumn<Article, Long> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -70,7 +50,7 @@ public class ArticleSearchPage {
             private final Button detailsButton = new Button("View Details");
 
             {
-                detailsButton.setOnAction((ActionEvent event) -> {
+                detailsButton.setOnAction(event -> {
                     Article article = getTableView().getItems().get(getIndex());
                     DataHolder.getInstance().setSelectedArticleId(article.getId());
                     Navigation.navigateTo("ArticleDetailsPage");
@@ -80,24 +60,48 @@ public class ArticleSearchPage {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(detailsButton);
-                }
+                setGraphic(empty ? null : detailsButton);
             }
         });
 
+        // Add the columns to the TableView
+        tableView.getColumns().clear(); // Clear any pre-existing columns if present
         tableView.getColumns().addAll(idColumn, titleColumn, shortDescColumn, actionColumn);
 
-        // Initial Data
-        List<Article> articles = ArticlesAPI.listArticlesAsync().get();
-        ObservableList<Article> data = FXCollections.observableArrayList(articles);
-        tableView.setItems(data);
+        // Declare allArticles as final so it can be used inside lambda expressions
+        final List<Article> allArticles;
+        try {
+            allArticles = ArticlesAPI.listArticlesAsync().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return; // Exit if there is an error fetching articles
+        }
+
+        // Filter articles based on the initial query
+        List<Article> filteredArticles = allArticles.stream()
+                .filter(article -> article.getTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        tableView.setItems(FXCollections.observableArrayList(filteredArticles));
+
+        // Search Button
+        Button searchButton = new Button("Search");
+        searchButton.setOnAction((ActionEvent event) -> {
+            String updatedQuery = searchField.getText().trim();
+            if (!updatedQuery.isEmpty()) {
+                // Re-filter based on the updated search query
+                List<Article> updatedFiltered = allArticles.stream()
+                        .filter(article -> article.getTitle().toLowerCase().contains(updatedQuery.toLowerCase()))
+                        .collect(Collectors.toList());
+                tableView.setItems(FXCollections.observableArrayList(updatedFiltered));
+            } else {
+                // Show all articles if the search query is empty
+                tableView.setItems(FXCollections.observableArrayList(allArticles));
+            }
+        });
 
         // Back Button
         Button backButton = new Button("Back");
-        backButton.setOnAction(e -> Navigation.navigateTo("ArticlesListPage"));
+        backButton.setOnAction(e -> Navigation.navigateTo("AdminHomePage"));
 
         // Layout
         VBox layout = new VBox(15);
@@ -105,8 +109,9 @@ public class ArticleSearchPage {
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(titleLabel, searchField, searchButton, tableView, backButton);
 
+        // Scene Setup
         Scene scene = new Scene(layout, 800, 600);
-
         Navigation.registerScene("ArticleSearchPage", scene);
     }
 }
+

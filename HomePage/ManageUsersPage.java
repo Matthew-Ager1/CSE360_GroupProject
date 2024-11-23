@@ -3,7 +3,6 @@ package HomePage;
 import Core.Navigation;
 import Database.GroupsAPI;
 import Database.UsersAPI;
-import Database.Models.Group;
 import Database.Models.Role;
 import Database.Models.User;
 import javafx.collections.FXCollections;
@@ -12,44 +11,46 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class ManageUsersPage {
-    public static void RegisterWithNavigation() {
+
+    public static void RegisterWithNavigation(List<User> users) {
         // Title
         Label titleLabel = new Label("Manage Users");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         // ListView to display users
         ListView<String> usersListView = new ListView<>();
-        refreshUsersList(usersListView);
+        refreshUsersList(usersListView, users);
 
         // Buttons
         Button addUserButton = new Button("Add User");
         addUserButton.setOnAction(e -> {
             showAddUserDialog();
-            refreshUsersList(usersListView);
+            refreshUsersList(usersListView, users);
         });
 
-        Button assignGroupButton = new Button("Assign to Group");
-        assignGroupButton.setOnAction(e -> {
+        Button changeRolesButton = new Button("Change Roles");
+        changeRolesButton.setOnAction(e -> {
             String selectedUser = usersListView.getSelectionModel().getSelectedItem();
             if (selectedUser != null) {
                 String username = selectedUser.split(" - ")[0];
-                showAssignGroupDialog(username);
-                refreshUsersList(usersListView);
+                showChangeRolesDialog(username);
+                refreshUsersList(usersListView, users);
             } else {
-                showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a user to assign.");
+                showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a user to change roles.");
             }
         });
 
-        Button removeUserButton = new Button("Remove User");
+        Button removeUserButton = new Button("Delete User");
         removeUserButton.setOnAction(e -> {
             String selectedUser = usersListView.getSelectionModel().getSelectedItem();
             if (selectedUser != null) {
@@ -62,7 +63,7 @@ public class ManageUsersPage {
                     } else {
                         showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete user.");
                     }
-                    refreshUsersList(usersListView);
+                    refreshUsersList(usersListView, users);
                 }
             } else {
                 showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a user to remove.");
@@ -78,7 +79,7 @@ public class ManageUsersPage {
         // Layout for buttons
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
-        buttonsBox.getChildren().addAll(addUserButton, assignGroupButton, removeUserButton, backButton);
+        buttonsBox.getChildren().addAll(addUserButton, changeRolesButton, removeUserButton, backButton);
 
         // Layout
         VBox layout = new VBox(10);
@@ -89,11 +90,10 @@ public class ManageUsersPage {
         Navigation.registerScene("ManageUsersPage", scene);
     }
 
-    private static void refreshUsersList(ListView<String> usersListView) {
-        List<User> users = UsersAPI.getAllUsers();
+    private static void refreshUsersList(ListView<String> usersListView, List<User> users) {
         ObservableList<String> userStrings = FXCollections.observableArrayList();
         for (User user : users) {
-            userStrings.add(user.getUsername() + " - " + user.getRole().toString());
+            userStrings.add(user.getUsername() + " - " + user.getRoles());
         }
         usersListView.setItems(userStrings);
     }
@@ -149,7 +149,10 @@ public class ManageUsersPage {
                     return null;
                 }
 
-                return new User(email, username, password, name, false, 0, role, new ArrayList<>());
+                // Use correct constructor with Set<Role>
+                Set<Role> roles = new HashSet<>();
+                roles.add(role);
+                return new User(email, username, password, name, false, 0, roles, new ArrayList<>());
             }
             return null;
         });
@@ -164,54 +167,70 @@ public class ManageUsersPage {
         });
     }
 
-    private static void showAssignGroupDialog(String username) {
+    private static void showChangeRolesDialog(String username) {
+        User user = UsersAPI.getUserByUsername(username);
+        if (user == null) {
+            showAlert(Alert.AlertType.ERROR, "User Not Found", "The selected user could not be found.");
+            return;
+        }
+
         Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Assign User to Group");
-        dialog.setHeaderText("Select a group to assign to user: " + username);
+        dialog.setTitle("Change Roles");
+        dialog.setHeaderText("Select roles for user: " + user.getName());
 
         // Set the button types.
-        ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        // Create the fields
-        ComboBox<String> groupComboBox = new ComboBox<>();
-        List<Group> groups = GroupsAPI.getAllGroups();
-        ObservableList<String> groupNames = FXCollections.observableArrayList();
-        for (Group group : groups) {
-            groupNames.add(group.getName() + (group.isSpecialAccess() ? " (SAG)" : ""));
-        }
-        groupComboBox.setItems(groupNames);
-        groupComboBox.setValue(null);
+        // Create checkboxes for each role
+        CheckBox adminCheckBox = new CheckBox("Admin");
+        CheckBox instructorCheckBox = new CheckBox("Instructor");
+        CheckBox studentCheckBox = new CheckBox("Student");
+
+        // Set selected based on current roles
+        Set<Role> roles = user.getRoles();
+        adminCheckBox.setSelected(roles.contains(Role.ADMIN));
+        instructorCheckBox.setSelected(roles.contains(Role.INSTRUCTOR));
+        studentCheckBox.setSelected(roles.contains(Role.STUDENT));
 
         // Layout
         VBox content = new VBox(10);
-        content.getChildren().addAll(new Label("Group:"), groupComboBox);
+        content.getChildren().addAll(
+                new Label("Roles:"),
+                adminCheckBox,
+                instructorCheckBox,
+                studentCheckBox
+        );
         dialog.getDialogPane().setContent(content);
 
-        // Convert the result to group name when the assign button is clicked.
         dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == assignButtonType) {
-                String selectedGroup = groupComboBox.getValue();
-                if (selectedGroup == null) {
-                    showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please select a group.");
+            if (dialogButton == saveButtonType) {
+                Set<Role> newRoles = new HashSet<>();
+                if (adminCheckBox.isSelected()) {
+                    newRoles.add(Role.ADMIN);
+                }
+                if (instructorCheckBox.isSelected()) {
+                    newRoles.add(Role.INSTRUCTOR);
+                }
+                if (studentCheckBox.isSelected()) {
+                    newRoles.add(Role.STUDENT);
+                }
+                if (newRoles.isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, "Invalid Input", "At least one role must be selected.");
                     return null;
                 }
-                return null; // We handle the action separately
+
+                boolean success = UsersAPI.updateUserRoles(user.getUsername(), newRoles);
+                if (success) {
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "User roles updated successfully.");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update user roles.");
+                }
             }
             return null;
         });
 
-        Optional<Void> result = dialog.showAndWait();
-        result.ifPresent(v -> {
-            String selectedGroup = groupComboBox.getValue();
-            String groupName = selectedGroup.replace(" (SAG)", "").trim();
-            boolean success = UsersAPI.addUserToGroup(username, groupName);
-            if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "User assigned to group successfully.");
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to assign user to group.");
-            }
-        });
+        dialog.showAndWait();
     }
 
     private static boolean showConfirmationDialog(String title, String message) {
@@ -227,3 +246,4 @@ public class ManageUsersPage {
         alert.showAndWait();
     }
 }
+

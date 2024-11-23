@@ -1,19 +1,22 @@
 package Database;
 
-import org.mindrot.jbcrypt.BCrypt;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class PasswordUtil {
-
-    // Hashes a password using bcrypt
-    public static String hashPassword(String plainPassword) {
-        return BCrypt.hashpw(plainPassword, BCrypt.gensalt(12)); // 12 is the log rounds
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedPassword = md.digest(password.getBytes());
+            return Base64.getEncoder().encodeToString(hashedPassword);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    // Verifies a password against a hashed password
-    public static boolean verifyPassword(String plainPassword, String hashedPassword) {
-        if (hashedPassword == null || !hashedPassword.startsWith("$2a$")) {
-            throw new IllegalArgumentException("Invalid hashed password format.");
-        }
-        return BCrypt.checkpw(plainPassword, hashedPassword);
+    public static boolean verifyPassword(String enteredPassword, String storedHashedPassword) {
+        String hashedPassword = hashPassword(enteredPassword);
+        return hashedPassword.equals(storedHashedPassword);
     }
 }

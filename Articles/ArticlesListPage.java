@@ -79,3 +79,4 @@ public class ArticlesListPage {
         Navigation.registerScene("ArticlesListPage", scene);
     }
 }
+
