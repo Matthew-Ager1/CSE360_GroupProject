@@ -52,3 +52,5 @@ public class Main extends Application {
         Navigation.navigateTo("LoginPage");
     }
 }
+
+

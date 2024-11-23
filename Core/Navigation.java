@@ -67,3 +67,5 @@ public class Navigation {
         sceneHistory.clear();
     }
 }
+
+

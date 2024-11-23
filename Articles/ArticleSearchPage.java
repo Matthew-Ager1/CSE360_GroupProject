@@ -114,3 +114,4 @@ public class ArticleSearchPage {
         Navigation.registerScene("ArticleSearchPage", scene);
     }
 }
+

@@ -78,3 +78,4 @@ public class RegistrationPage {
     	Navigation.registerScene("LoginPage", scene);
     }
 }
+

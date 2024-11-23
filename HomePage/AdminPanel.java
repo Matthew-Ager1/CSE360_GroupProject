@@ -98,3 +98,4 @@ public class AdminPanel {
         articles.forEach(article -> System.out.println(article.getTitle() + " - " + article.getBody()));
     }
 }
+
