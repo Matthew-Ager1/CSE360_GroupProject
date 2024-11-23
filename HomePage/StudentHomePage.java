@@ -10,13 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import Articles.ArticleSearchPage;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 
-public class AdminHomePage {
+public class StudentHomePage {
     public static void RegisterWithNavigation(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
@@ -40,22 +35,11 @@ public class AdminHomePage {
         // Search Button
         Button searchButton = new Button("Search");
         searchButton.setOnAction(event -> {
-            String query = searchField.getText().trim();
+            String query = searchField.getText();
             if (!query.isEmpty()) {
-                // Register the search query and navigate to ArticleSearchPage
-                ArticleSearchPage.RegisterWithNavigation(query);
+                SearchResultPage.RegisterWithNavigation(query);
                 Navigation.navigateTo("ArticleSearchPage");
-            } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter a search query.", ButtonType.OK);
-                alert.showAndWait();
             }
-        });
-
-        // Admin Panel Button
-        Button adminPanelButton = new Button("Admin Panel");
-        adminPanelButton.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white;");
-        adminPanelButton.setOnAction(event -> {
-            Navigation.navigateTo("AdminPanel");
         });
 
         // Logout Button
@@ -65,22 +49,21 @@ public class AdminHomePage {
             Navigation.navigateTo("LoginPage");
         });
 
-        // Layout for Main Buttons
-        VBox mainButtons = new VBox(10);
-        mainButtons.setPadding(new Insets(20));
-        mainButtons.setAlignment(Pos.CENTER);
-        mainButtons.getChildren().addAll(adminPanelButton, logoutButton);
+        // Top Bar Layout (Search Bar, Search Button, Logout Button)
+        HBox topBar = new HBox(10);
+        topBar.setPadding(new Insets(10));
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        topBar.getChildren().addAll(searchLabel, searchField, searchButton, logoutButton);
 
         // Main Layout
         BorderPane mainLayout = new BorderPane();
-        mainLayout.setTop(new HBox(10, searchLabel, searchField, searchButton));
+        mainLayout.setTop(topBar);
         mainLayout.setCenter(titleLabel);
-        mainLayout.setBottom(mainButtons);
         BorderPane.setAlignment(titleLabel, Pos.CENTER);
 
         // Scene Setup
         Scene scene = new Scene(mainLayout, 600, 400);
-        Navigation.registerScene("AdminHomePage", scene);
+        Navigation.registerScene("StudentHomePage", scene); // Correct registration
 
         // Register search results page
         SearchResultPage.RegisterWithNavigation("Welcome");

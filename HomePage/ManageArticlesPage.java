@@ -71,7 +71,7 @@ public class ManageArticlesPage {
         // Back Button
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
-            Navigation.navigateTo("InstructorHomePage");
+            Navigation.goBack();  // This will go back to the previous page based on history
         });
 
         // Layout for buttons

@@ -17,12 +17,24 @@ import javafx.scene.layout.VBox;
 
 import java.util.Arrays;
 import java.util.List;
+import Database.Models.User;  // Import User class
 
 public class InstructorHomePage {
-    public static void RegisterWithNavigation() {
+    // Modify the method to accept a User object
+    public static void RegisterWithNavigation(User user) {
+        // Check if the user is null before proceeding
+        if (user == null) {
+            System.out.println("Error: User is null.");
+            return; // Optionally, return early or handle this scenario appropriately
+        }
+
         // Title Label
         Label titleLabel = new Label("Instructor Dashboard");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        // Optional: Display username if desired
+        Label usernameLabel = new Label("Welcome, " + user.getUsername());
+        usernameLabel.setStyle("-fx-font-size: 16px; -fx-font-style: italic;");
 
         // Manage Articles Button
         Button manageArticlesButton = new Button("Manage Articles");
@@ -59,6 +71,7 @@ public class InstructorHomePage {
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(
                 titleLabel,
+                usernameLabel,  // Optionally show username
                 manageArticlesButton,
                 backupRestoreGroupsButton,
                 manageStudentAccessButton,
@@ -69,3 +82,4 @@ public class InstructorHomePage {
         Navigation.registerScene("InstructorHomePage", scene);
     }
 }
+
