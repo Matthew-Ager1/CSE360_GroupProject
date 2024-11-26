@@ -42,13 +42,11 @@ public class RegistrationPage {
         passwordMatchLabel.setStyle("-fx-text-fill: red;");
 
         ChangeListener<String> passwordValidationListener = (observable, oldValue, newValue) -> {
-            if (passwordField.getText().isEmpty() || confirmPasswordField.getText().isEmpty()) {
-                passwordMatchLabel.setText("");
-            } else if (passwordField.getText().equals(confirmPasswordField.getText())) {
-                passwordMatchLabel.setText("Passwords match.");
+            String message = passwordChecker(passwordField.getText(), confirmPasswordField.getText());
+            passwordMatchLabel.setText(message);
+            if (message.equals("Passwords match.")) {
                 passwordMatchLabel.setStyle("-fx-text-fill: green;");
             } else {
-                passwordMatchLabel.setText("Passwords do not match.");
                 passwordMatchLabel.setStyle("-fx-text-fill: red;");
             }
         };
@@ -77,7 +75,7 @@ public class RegistrationPage {
                 return;
             }
 
-            if (!enteredPassword.equals(confirmPassword)) {
+            if (!passwordChecker(enteredPassword, confirmPassword).equals("Passwords match.")) {
                 showAlert(Alert.AlertType.ERROR, "Password Mismatch", "Passwords do not match. Please try again.");
                 return;
             }
@@ -107,7 +105,7 @@ public class RegistrationPage {
                 showAlert(Alert.AlertType.ERROR, "Database Error", "There was an error saving your user. Please try again.");
                 return;
             }
-            
+
             Navigation.navigateTo("LoginPage", null);
         });
 
@@ -129,6 +127,13 @@ public class RegistrationPage {
         grid.add(submitButton, 1, 5);
 
         return new Scene(grid, 400, 300);
+    }
+
+    public static String passwordChecker(String password, String confirmPassword) {
+        if (password.isEmpty() || confirmPassword.isEmpty()) {
+            return "";
+        }
+        return password.equals(confirmPassword) ? "Passwords match." : "Passwords do not match.";
     }
 
     private static void showAlert(Alert.AlertType alertType, String title, String message) {
