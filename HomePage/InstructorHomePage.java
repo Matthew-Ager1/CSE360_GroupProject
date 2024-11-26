@@ -40,21 +40,21 @@ public class InstructorHomePage {
         Button manageArticlesButton = new Button("Manage Articles");
         manageArticlesButton.setMaxWidth(Double.MAX_VALUE);
         manageArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageArticlesPage");
+            Navigation.navigateTo("ManageArticlesPage", null);
         });
 
         // Backup/Restore Groups Button
         Button backupRestoreGroupsButton = new Button("Backup/Restore Groups");
         backupRestoreGroupsButton.setMaxWidth(Double.MAX_VALUE);
         backupRestoreGroupsButton.setOnAction(e -> {
-            Navigation.navigateTo("BackupRestoreGroupsPage");
+            Navigation.navigateTo("BackupRestoreGroupsPage", null);
         });
 
         // Manage Student Access Button
         Button manageStudentAccessButton = new Button("Manage Student Access");
         manageStudentAccessButton.setMaxWidth(Double.MAX_VALUE);
         manageStudentAccessButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageStudentAccessPage");
+            Navigation.navigateTo("ManageStudentAccessPage", null);
         });
 
         // Logout Button
@@ -62,7 +62,7 @@ public class InstructorHomePage {
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setOnAction(e -> {
-            Navigation.navigateTo("LoginPage");
+            Navigation.navigateTo("LoginPage", null);
         });
 
         // Layout

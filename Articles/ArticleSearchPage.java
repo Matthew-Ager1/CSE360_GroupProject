@@ -53,7 +53,7 @@ public class ArticleSearchPage {
                 detailsButton.setOnAction(event -> {
                     Article article = getTableView().getItems().get(getIndex());
                     DataHolder.getInstance().setSelectedArticleId(article.getId());
-                    Navigation.navigateTo("ArticleDetailsPage");
+                    Navigation.navigateTo("ArticleDetailsPage", null);
                 });
             }
 
@@ -101,7 +101,7 @@ public class ArticleSearchPage {
 
         // Back Button
         Button backButton = new Button("Back");
-        backButton.setOnAction(e -> Navigation.navigateTo("AdminHomePage"));
+        backButton.setOnAction(e -> Navigation.navigateTo("AdminHomePage", null));
 
         // Layout
         VBox layout = new VBox(15);

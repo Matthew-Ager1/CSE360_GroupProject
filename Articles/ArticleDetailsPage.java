@@ -81,7 +81,7 @@ public class ArticleDetailsPage {
 
         // Back Button
         Button backButton = new Button("Back");
-        backButton.setOnAction(e -> Navigation.navigateTo("ArticleSearchPage"));
+        backButton.setOnAction(e -> Navigation.navigateTo("ArticleSearchPage", null));
 
         // Layout
         VBox layout = new VBox(10);

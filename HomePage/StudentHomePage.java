@@ -38,7 +38,7 @@ public class StudentHomePage {
             String query = searchField.getText();
             if (!query.isEmpty()) {
                 SearchResultPage.RegisterWithNavigation(query);
-                Navigation.navigateTo("ArticleSearchPage");
+                Navigation.navigateTo("ArticleSearchPage", null);
             }
         });
 
@@ -46,7 +46,7 @@ public class StudentHomePage {
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
         logoutButton.setOnAction(event -> {
-            Navigation.navigateTo("LoginPage");
+            Navigation.navigateTo("LoginPage", null);
         });
 
         // Top Bar Layout (Search Bar, Search Button, Logout Button)

@@ -13,12 +13,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import java.time.LocalDateTime;
 
 public class ManageUsersPage {
 
@@ -34,7 +39,7 @@ public class ManageUsersPage {
         // Buttons
         Button addUserButton = new Button("Add User");
         addUserButton.setOnAction(e -> {
-            showAddUserDialog();
+            showAddUserDialog(users);
             refreshUsersList(usersListView, users);
         });
 
@@ -43,7 +48,7 @@ public class ManageUsersPage {
             String selectedUser = usersListView.getSelectionModel().getSelectedItem();
             if (selectedUser != null) {
                 String username = selectedUser.split(" - ")[0];
-                showChangeRolesDialog(username);
+                showChangeRolesDialog(username, users);
                 refreshUsersList(usersListView, users);
             } else {
                 showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a user to change roles.");
@@ -73,7 +78,7 @@ public class ManageUsersPage {
         // Back Button
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
-            Navigation.navigateTo("AdminHomePage");
+            Navigation.navigateTo("AdminHomePage", null);
         });
 
         // Layout for buttons
@@ -92,22 +97,72 @@ public class ManageUsersPage {
 
     private static void refreshUsersList(ListView<String> usersListView, List<User> users) {
         ObservableList<String> userStrings = FXCollections.observableArrayList();
+
+        // Filter out any null users from the list
+        List<User> validUsers = new ArrayList<>();
         for (User user : users) {
+            if (user != null && user.getUsername() != null && !user.getUsername().isEmpty()) {
+                validUsers.add(user);
+            }
+        }
+
+        // Set up custom ListCell renderer
+        usersListView.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    // Extract the username and the user's isFinished status
+                    String username = item.split(" - ")[0];
+                    User user = UsersAPI.getUserByUsername(username);  // Fetch user object using the username
+                    HBox userBox = new HBox(5);
+                    Text userText = new Text(item);
+                    userBox.getChildren().add(userText);
+
+                    // Check if the user is verified or not
+                    Text verificationText = new Text();
+                    if (user != null) {
+                        if (user.getIsFinished()) {
+                            // If user is verified, show a bold blue "V"
+                            verificationText.setText(" V");
+                            verificationText.setFont(Font.font("Arial", 16));
+                            verificationText.setFill(Color.BLUE);
+                            verificationText.setStyle("-fx-font-weight: bold;");
+                        } else {
+                            // If user is not verified, show grey "NV"
+                            verificationText.setText(" NV");
+                            verificationText.setFont(Font.font("Arial", 16));
+                            verificationText.setFill(Color.GRAY);  // Grey color for unverified
+                        }
+                    }
+
+                    userBox.getChildren().add(verificationText);  // Add "V" or "NV" to the HBox
+                    setGraphic(userBox);  // Set the whole cell's graphic as the HBox containing the user and verification text
+                }
+            }
+        });
+
+        // Populate the ListView with the filtered list of valid users
+        for (User user : validUsers) {
             userStrings.add(user.getUsername() + " - " + user.getRoles());
         }
+
         usersListView.setItems(userStrings);
     }
 
-    private static void showAddUserDialog() {
+    private static void showAddUserDialog(List<User> users) {
         Dialog<User> dialog = new Dialog<>();
         dialog.setTitle("Add New User");
         dialog.setHeaderText("Enter user details:");
 
-        // Set the button types.
+        // Set the button types
         ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-        // Create the fields
+        // Create fields for user input
         TextField emailField = new TextField();
         emailField.setPromptText("Email");
 
@@ -117,42 +172,67 @@ public class ManageUsersPage {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
 
-        TextField nameField = new TextField();
-        nameField.setPromptText("Full Name");
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("First Name");
+
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Last Name");
+
+        TextField middleNameField = new TextField();
+        middleNameField.setPromptText("Middle Name (Optional)");
+
+        CheckBox onePassCheckBox = new CheckBox("OnePass");
+        onePassCheckBox.setSelected(false);
+
+        TextField expireField = new TextField();
+        expireField.setPromptText("Expiration (in days)");
 
         ComboBox<Role> roleComboBox = new ComboBox<>();
         roleComboBox.setItems(FXCollections.observableArrayList(Role.ADMIN, Role.INSTRUCTOR, Role.STUDENT));
         roleComboBox.setValue(Role.STUDENT);
 
-        // Layout
+        // Layout for input fields
         VBox content = new VBox(10);
         content.getChildren().addAll(
                 new Label("Email:"), emailField,
                 new Label("Username:"), usernameField,
                 new Label("Password:"), passwordField,
-                new Label("Full Name:"), nameField,
+                new Label("First Name:"), firstNameField,
+                new Label("Last Name:"), lastNameField,
+                new Label("Middle Name:"), middleNameField,
+                onePassCheckBox,
+                new Label("Expiration:"), expireField,
                 new Label("Role:"), roleComboBox
         );
         dialog.getDialogPane().setContent(content);
 
-        // Convert the result to a User when the add button is clicked.
+        // Convert the result to a User object when the Add button is clicked
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButtonType) {
                 String email = emailField.getText();
                 String username = usernameField.getText();
                 String password = passwordField.getText();
-                String name = nameField.getText();
+                String firstName = firstNameField.getText();
+                String lastName = lastNameField.getText();
+                String middleName = middleNameField.getText();
+                boolean onePass = onePassCheckBox.isSelected();
+                int expire = Integer.parseInt(expireField.getText());
                 Role role = roleComboBox.getValue();
 
-                if (email.isEmpty() || username.isEmpty() || password.isEmpty() || name.isEmpty()) {
+                if (email.isEmpty() || username.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, "Invalid Input", "All fields must be filled.");
                     return null;
                 }
 
-                // Use correct constructor with Set<Role>
-                Set<Role> roles = new HashSet<>();
-                roles.add(role);
-                return new User(email, username, password, name, false, 0, roles, new ArrayList<>());
+                // Create role set and groups list
+                Set<Role> roles = Set.of(role); // Assuming one role for simplicity
+                List<String> groups = List.of(); // Placeholder for empty groups
+                LocalDateTime passwordExpirationDate = LocalDateTime.now().plusDays(expire);  // Set expiration date based on input
+                Boolean isFinished = false; // Placeholder for finished status
+
+                // Construct a new User object with the updated constructor
+                return new User(email, username, firstName, lastName, middleName, onePass, expire, roles, groups,
+                        middleName.isEmpty() ? null : middleName, passwordExpirationDate, isFinished);
             }
             return null;
         });
@@ -160,6 +240,7 @@ public class ManageUsersPage {
         dialog.showAndWait().ifPresent(user -> {
             boolean success = UsersAPI.addUser(user);
             if (success) {
+                users.add(user);  // Add the new user to the list
                 showAlert(Alert.AlertType.INFORMATION, "Success", "User added successfully.");
             } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to add user.");
@@ -167,7 +248,7 @@ public class ManageUsersPage {
         });
     }
 
-    private static void showChangeRolesDialog(String username) {
+    private static void showChangeRolesDialog(String username, List<User> users) {
         User user = UsersAPI.getUserByUsername(username);
         if (user == null) {
             showAlert(Alert.AlertType.ERROR, "User Not Found", "The selected user could not be found.");
@@ -176,7 +257,7 @@ public class ManageUsersPage {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Change Roles");
-        dialog.setHeaderText("Select roles for user: " + user.getName());
+        dialog.setHeaderText("Select roles for user: " + user.getUsername());
 
         // Set the button types.
         ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
@@ -222,6 +303,7 @@ public class ManageUsersPage {
 
                 boolean success = UsersAPI.updateUserRoles(user.getUsername(), newRoles);
                 if (success) {
+                    user.setRoles(newRoles);  // Update the roles in the user object
                     showAlert(Alert.AlertType.INFORMATION, "Success", "User roles updated successfully.");
                 } else {
                     showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update user roles.");
@@ -240,10 +322,11 @@ public class ManageUsersPage {
         return result.isPresent() && result.get() == ButtonType.YES;
     }
 
-    private static void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type, message, ButtonType.OK);
+    private static void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }
-

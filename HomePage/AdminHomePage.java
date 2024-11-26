@@ -44,7 +44,7 @@ public class AdminHomePage {
             if (!query.isEmpty()) {
                 // Register the search query and navigate to ArticleSearchPage
                 ArticleSearchPage.RegisterWithNavigation(query);
-                Navigation.navigateTo("ArticleSearchPage");
+                Navigation.navigateTo("ArticleSearchPage", null);
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter a search query.", ButtonType.OK);
                 alert.showAndWait();
@@ -55,14 +55,14 @@ public class AdminHomePage {
         Button adminPanelButton = new Button("Admin Panel");
         adminPanelButton.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white;");
         adminPanelButton.setOnAction(event -> {
-            Navigation.navigateTo("AdminPanel");
+            Navigation.navigateTo("AdminPanel", user);
         });
 
         // Logout Button
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
         logoutButton.setOnAction(event -> {
-            Navigation.navigateTo("LoginPage");
+            Navigation.navigateTo("LoginPage", user);
         });
 
         // Layout for Main Buttons

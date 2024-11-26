@@ -26,28 +26,28 @@ public class AdminPanel {
         listUsersButton.setOnAction(e -> {
             List<User> users = fetchUsersFromDatabase();
             ManageUsersPage.RegisterWithNavigation(users);  // Pass the list of users
-            Navigation.navigateTo("ManageUsersPage");
+            Navigation.navigateTo("ManageUsersPage", null);
         });
 
         // List Articles Button
         Button listArticlesButton = new Button("List Articles");
         listArticlesButton.setMaxWidth(Double.MAX_VALUE);
         listArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageArticlesPage");
+            Navigation.navigateTo("ManageArticlesPage", null);
         });
 
         // Backup Articles Button
         Button backupArticlesButton = new Button("Backup Articles");
         backupArticlesButton.setMaxWidth(Double.MAX_VALUE);
         backupArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("BackupArticlesPage");
+            Navigation.navigateTo("BackupArticlesPage", null);
         });
 
         // Restore Articles Button
         Button restoreArticlesButton = new Button("Restore Articles");
         restoreArticlesButton.setMaxWidth(Double.MAX_VALUE);
         restoreArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("RestoreArticlesPage");
+            Navigation.navigateTo("RestoreArticlesPage", null);
         });
 
         // Back Button
@@ -55,7 +55,7 @@ public class AdminPanel {
         backButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white;");
         backButton.setMaxWidth(Double.MAX_VALUE);
         backButton.setOnAction(e -> {
-            Navigation.navigateTo("AdminHomePage");
+            Navigation.navigateTo("AdminHomePage", null);
         });
 
         // Logout Button
@@ -63,7 +63,7 @@ public class AdminPanel {
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setOnAction(e -> {
-            Navigation.navigateTo("LoginPage");
+            Navigation.navigateTo("LoginPage", null);
         });
 
         // Layout

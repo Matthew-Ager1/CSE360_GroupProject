@@ -7,10 +7,11 @@ import Articles.ArticleSearchPage;
 import Articles.ArticlesListPage;
 import HomePage.*;
 import LoginPage.LoginPage;
-import Database.UsersAPI; // Import UsersAPI
+import Database.UsersAPI;
+import Database.Models.*;
+import AccountCreation.*;
 import java.util.concurrent.ExecutionException;
 import java.util.List;
-import Database.Models.*;
 
 public class Main extends Application {
 
@@ -20,36 +21,40 @@ public class Main extends Application {
 
     @Override
     public void start(Stage baseStage) {
+
         Navigation.setPrimaryStage(baseStage);
 
-        // Register pages
+        Navigation.clearAllScenes();
+
         LoginPage.RegisterWithNavigation();
+        RegistrationPage.RegisterWithNavigation();
 
-        // Fetch users from the database
         List<User> users = UsersAPI.getAllUsers();
-        ManageUsersPage.RegisterWithNavigation(users); // Pass the list of users
+        ManageUsersPage.RegisterWithNavigation(users);
 
-        // Register other pages...
         try {
             ArticlesListPage.RegisterWithNavigation();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         ArticleDetailsPage.RegisterWithNavigation();
+
         try {
             ArticleSearchPage.RegisterWithNavigation("Welcome");
-        } catch (Exception e) { // Catch only relevant exceptions or remove the block if unnecessary
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-
         ManageArticlesPage.RegisterWithNavigation();
         ManageGroupsPage.RegisterWithNavigation();
-        InstructorHomePage.RegisterWithNavigation(null); // Pass null for now, user will be passed on login
         AdminPanel.RegisterWithNavigation();
 
-        // Navigate to the LoginPage first
-        Navigation.navigateTo("LoginPage");
+        User user = new User();
+
+        AdminHomePage.RegisterWithNavigation(user);
+        InstructorHomePage.RegisterWithNavigation(user);
+
+        Navigation.navigateTo("LoginPage", null);
     }
 }
 

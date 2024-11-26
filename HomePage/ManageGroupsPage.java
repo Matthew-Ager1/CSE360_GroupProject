@@ -65,7 +65,7 @@ public class ManageGroupsPage {
         // Back Button
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
-            Navigation.navigateTo("AdminHomePage");
+            Navigation.navigateTo("AdminHomePage", null);
         });
 
         // Layout for buttons

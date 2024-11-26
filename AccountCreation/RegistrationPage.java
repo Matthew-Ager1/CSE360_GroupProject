@@ -3,56 +3,112 @@ package AccountCreation;
 import Core.Navigation;
 import Database.UsersAPI;
 import Database.Models.User;
+import Database.Models.Role;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import Database.PasswordUtil;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class RegistrationPage {
-	public static void show(Stage primaryStage, String username, String password) {
-        Label emailLabel = new Label("Email:");
-        Label firstNameLabel = new Label("First Name:");
-        Label middleNameLabel = new Label("Middle Name:");
-        Label lastNameLabel = new Label("Last Name:");
-        Label preferredNameLabel = new Label("Preferred Name:");
+    public static void RegisterWithNavigation() {
+        Scene registrationScene = createRegistrationScene();
+        Navigation.registerScene("RegistrationPage", registrationScene);
+    }
 
-        TextField emailField = new TextField();
-        emailField.setPromptText("Enter email");
+    private static Scene createRegistrationScene() {
+        Label usernameLabel = new Label("Username:");
+        Label passwordLabel = new Label("Password:");
+        Label confirmPasswordLabel = new Label("Confirm Password:");
+        Label invitationCodeLabel = new Label("Invitation Code:");
 
-        TextField firstNameField = new TextField();
-        firstNameField.setPromptText("Enter first name");
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Enter username");
 
-        TextField middleNameField = new TextField();
-        middleNameField.setPromptText("Enter middle name");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Enter password");
 
-        TextField lastNameField = new TextField();
-        lastNameField.setPromptText("Enter last name");
+        PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordField.setPromptText("Confirm password");
 
-        TextField preferredNameField = new TextField();
-        preferredNameField.setPromptText("Enter preferred name");
+        Label passwordMatchLabel = new Label();
+        passwordMatchLabel.setStyle("-fx-text-fill: red;");
+
+        ChangeListener<String> passwordValidationListener = (observable, oldValue, newValue) -> {
+            if (passwordField.getText().isEmpty() || confirmPasswordField.getText().isEmpty()) {
+                passwordMatchLabel.setText("");
+            } else if (passwordField.getText().equals(confirmPasswordField.getText())) {
+                passwordMatchLabel.setText("Passwords match.");
+                passwordMatchLabel.setStyle("-fx-text-fill: green;");
+            } else {
+                passwordMatchLabel.setText("Passwords do not match.");
+                passwordMatchLabel.setStyle("-fx-text-fill: red;");
+            }
+        };
+
+        passwordField.textProperty().addListener(passwordValidationListener);
+        confirmPasswordField.textProperty().addListener(passwordValidationListener);
+
+        TextField invitationCodeField = new TextField();
+        invitationCodeField.setPromptText("Enter invitation code");
 
         Button submitButton = new Button("Submit");
         submitButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         submitButton.setOnAction(event -> {
-            String email = emailField.getText();
-            String firstName = firstNameField.getText();
-            String middleName = middleNameField.getText();
-            String lastName = lastNameField.getText();
-            String preferredName = preferredNameField.getText();
+            String username = usernameField.getText();
+            String enteredPassword = passwordField.getText();
+            String confirmPassword = confirmPasswordField.getText();
+            String invitationCode = invitationCodeField.getText();
 
-            if (!email.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty()) {
-                System.out.println("Account created for: " + username + ", " + firstName + " " + lastName);
-                User user = new User();
-                user.setEmail(email);
-                user.setName(firstName + " " + middleName + " " + lastName);
-                user.setPassword(password);
-                user.setUsername(username);
-                UsersAPI.addUser(user);
+            if (invitationCode.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Form Error!", "Please enter the invitation code.");
+                return;
             }
+
+            if (username.isEmpty() || enteredPassword.isEmpty() || confirmPassword.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Form Error!", "Please enter all required fields.");
+                return;
+            }
+
+            if (!enteredPassword.equals(confirmPassword)) {
+                showAlert(Alert.AlertType.ERROR, "Password Mismatch", "Passwords do not match. Please try again.");
+                return;
+            }
+
+            List<User> users = UsersAPI.getAllUsers();
+            for (User existingUser : users) {
+                if (existingUser != null && existingUser.getUsername() != null && existingUser.getUsername().trim().equalsIgnoreCase(username)) {
+                    showAlert(Alert.AlertType.ERROR, "User Exists", "A user with that username already exists. Please choose a different username.");
+                    return;
+                }
+            }
+
+            String hashedPassword = PasswordUtil.hashPassword(enteredPassword);
+
+            User user = new User();
+            user.setUsername(username);
+            user.setPassword(hashedPassword);
+
+            Set<Role> roles = new HashSet<>();
+            if (invitationCode.contains("a")) roles.add(Role.ADMIN);
+            if (invitationCode.contains("i")) roles.add(Role.INSTRUCTOR);
+            if (invitationCode.contains("s")) roles.add(Role.STUDENT);
+            user.setRoles(roles);
+
+            boolean userAdded = UsersAPI.addUser(user);
+            if (!userAdded) {
+                showAlert(Alert.AlertType.ERROR, "Database Error", "There was an error saving your user. Please try again.");
+                return;
+            }
+            
+            Navigation.navigateTo("LoginPage", null);
         });
 
         GridPane grid = new GridPane();
@@ -61,21 +117,25 @@ public class RegistrationPage {
         grid.setHgap(10);
         grid.setPadding(new Insets(20));
 
-        grid.add(emailLabel, 0, 0);
-        grid.add(emailField, 1, 0);
-        grid.add(firstNameLabel, 0, 1);
-        grid.add(firstNameField, 1, 1);
-        grid.add(middleNameLabel, 0, 2);
-        grid.add(middleNameField, 1, 2);
-        grid.add(lastNameLabel, 0, 3);
-        grid.add(lastNameField, 1, 3);
-        grid.add(preferredNameLabel, 0, 4);
-        grid.add(preferredNameField, 1, 4);
+        grid.add(usernameLabel, 0, 0);
+        grid.add(usernameField, 1, 0);
+        grid.add(passwordLabel, 0, 1);
+        grid.add(passwordField, 1, 1);
+        grid.add(confirmPasswordLabel, 0, 2);
+        grid.add(confirmPasswordField, 1, 2);
+        grid.add(passwordMatchLabel, 1, 3);
+        grid.add(invitationCodeLabel, 0, 4);
+        grid.add(invitationCodeField, 1, 4);
         grid.add(submitButton, 1, 5);
 
-        Scene scene = new Scene(grid, 400, 350);
+        return new Scene(grid, 400, 300);
+    }
 
-    	Navigation.registerScene("LoginPage", scene);
+    private static void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
-

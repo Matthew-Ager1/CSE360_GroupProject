@@ -35,7 +35,7 @@ public class SearchResultPage {
             String newQuery = searchField.getText();
             if (!newQuery.isEmpty()) {
                 RegisterWithNavigation(newQuery); // Refresh the page with new search
-                Navigation.navigateTo("SearchResultPage");
+                Navigation.navigateTo("SearchResultPage", null);
             }
         });
 
@@ -43,7 +43,7 @@ public class SearchResultPage {
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
         logoutButton.setOnAction(event -> {
-            Navigation.navigateTo("LoginPage");
+            Navigation.navigateTo("LoginPage", null);
         });
 
         // Feedback Section (5-star rating and comments)

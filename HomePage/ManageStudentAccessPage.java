@@ -54,7 +54,7 @@ public class ManageStudentAccessPage {
         // Back Button
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
-            Navigation.navigateTo("InstructorHomePage");
+            Navigation.navigateTo("InstructorHomePage", null);
         });
 
         // Layout for buttons
