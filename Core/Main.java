@@ -22,9 +22,11 @@ import javafx.scene.text.TextFlow;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
+import AccountCreation.RegistrationPage;
 import Articles.ArticleDetailsPage;
 import Articles.ArticleSearchPage;
 import Articles.ArticlesListPage;
+import Database.InviteCodesAPI;
 import HomePage.*;
 import LoginPage.LoginPage;
 import javafx.scene.layout.Pane;
@@ -41,7 +43,7 @@ public class Main extends Application {
 		
 		//UserHomePage.RegisterWithNavigation();
 		//InstructorHomePage.RegisterWithNavigation();
-		
+		InviteCodesAPI.addInviteCode("TestCode");
 		
 		try {
 			ArticlesListPage.RegisterWithNavigation();
@@ -64,11 +66,12 @@ public class Main extends Application {
         ManageUsersPage.RegisterWithNavigation();
         AdminHomePage.RegisterWithNavigation();
         InstructorHomePage.RegisterWithNavigation();
-        
+        UserHomePage.RegisterWithNavigation();
+        RegistrationPage.RegisterWithNavigation();
 		
 		
 	    //AccountCreationUI.RegisterWithNavigation(baseStage);
 		
-        Navigation.navigateTo("ManageArticlesPage");
+        Navigation.navigateTo("LoginPage");
     }
 }

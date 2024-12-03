@@ -147,6 +147,19 @@ public class UsersAPI {
         }
         return false;
     }
+    
+    // Method to update a user's password
+    public static Boolean updateUserPassword(String username, String password) {
+        try {
+            Bson filter = Filters.eq("username", username);
+            Bson update = Updates.set("password", password.toString());
+            usersCollection.updateOne(filter, update);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // Private helper methods
 
