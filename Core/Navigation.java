@@ -5,7 +5,7 @@ import javafx.stage.*;
 import javafx.scene.*;
 
 public class Navigation {
-	private static Stage primaryStage;
+	public static Stage primaryStage;
     private static final HashMap<String, Scene> scenes = new HashMap<>();
 
     // Set the primary stage (typically called once from your main application)

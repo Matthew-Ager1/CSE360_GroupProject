@@ -1,6 +1,8 @@
 package LoginPage;
 
+import AccountCreation.PasswordResetPage;
 import Core.Navigation;
+import Database.InviteCodesAPI;
 import Database.UsersAPI;
 import Database.Models.Role;
 import Database.Models.User;
@@ -16,6 +18,10 @@ public class LoginPage {
     	// Create a label for the page title
         Label titleLabel = new Label("Welcome, Please Log In");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        
+        TextField inviteField = new TextField();
+        inviteField.setPromptText("Enter invite code");
+        inviteField.setMaxWidth(200);
 
         // Username field
         TextField usernameField = new TextField();
@@ -26,6 +32,10 @@ public class LoginPage {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter password");
         passwordField.setMaxWidth(200);
+        
+        PasswordField optionalOTPField = new PasswordField();
+        optionalOTPField.setPromptText("One Time Password (Optional)");
+        optionalOTPField.setMaxWidth(200);
 
         // Login button with improved styling
         Button loginButton = new Button("Login");
@@ -34,6 +44,24 @@ public class LoginPage {
         loginButton.setOnAction((ActionEvent event) -> {
             String username = usernameField.getText();
             String password = passwordField.getText();
+            String otp = optionalOTPField.getText();
+            
+            Boolean isOtp = false;
+            if (!otp.isEmpty()) {
+            	password = otp;
+            	isOtp = true;
+            }
+            
+            String inviteCode = inviteField.getText();
+            if (!inviteCode.isEmpty()) {
+            	if (InviteCodesAPI.isInviteCodeValid(inviteCode)) {
+            		Navigation.navigateTo("RegistrationPage");
+            		return;
+            	}
+            	else {
+            		return;
+            	}
+            }
             
             // Validate inputs
             if (username.isEmpty() || password.isEmpty()) {
@@ -45,7 +73,10 @@ public class LoginPage {
             // Add database logic
             if (UsersAPI.isValidLogin(username, password)) {
             	User user = UsersAPI.getUserByUsername(username);
-            	if (user != null) {
+            	if (isOtp) {
+            		PasswordResetPage.show(Navigation.primaryStage, user);
+            	}
+            	else if (user != null) {
             	    switch (user.getRole()) {
             	        case ADMIN:
             	            Navigation.navigateTo("AdminHomePage");
@@ -54,7 +85,7 @@ public class LoginPage {
             	            Navigation.navigateTo("InstructorHomePage");
             	            break;
             	        case STUDENT:
-            	            Navigation.navigateTo("StudentHomePage");
+            	            Navigation.navigateTo("UserHomePage");
             	            break;
             	        default:
             	            Alert alert = new Alert(Alert.AlertType.ERROR, "Unknown user role.", ButtonType.OK);
@@ -62,8 +93,7 @@ public class LoginPage {
             	            break;
             	    }
             	} else {
-            	    Alert alert = new Alert(Alert.AlertType.ERROR, "User not found.", ButtonType.OK);
-            	    alert.showAndWait();
+            	    
             	}
             } else {
             	Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid username or password.", ButtonType.OK);
@@ -75,9 +105,9 @@ public class LoginPage {
         VBox layout = new VBox(15);  // Increased spacing between elements
         layout.setPadding(new Insets(20));  // Add padding around the layout
         layout.setAlignment(Pos.CENTER);  // Center the elements
-        layout.getChildren().addAll(titleLabel, usernameField, passwordField, loginButton);
+        layout.getChildren().addAll(titleLabel, inviteField, usernameField, passwordField, optionalOTPField, loginButton);
     	
-        Scene scene = new Scene(layout, 350, 250);
+        Scene scene = new Scene(layout, 350, 350);
     	
     	Navigation.registerScene("LoginPage", scene);
     }
