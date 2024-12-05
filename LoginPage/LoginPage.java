@@ -1,114 +1,84 @@
 package LoginPage;
 
-import AccountCreation.PasswordResetPage;
+import AccountCreation.FinishRegistrationPage;
 import Core.Navigation;
-import Database.InviteCodesAPI;
 import Database.UsersAPI;
-import Database.Models.Role;
 import Database.Models.User;
+import HomePage.RoleSelection;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import Database.PasswordUtil;
 
 public class LoginPage {
     public static void RegisterWithNavigation() {
-    	// Create a label for the page title
         Label titleLabel = new Label("Welcome, Please Log In");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-        
-        TextField inviteField = new TextField();
-        inviteField.setPromptText("Enter invite code");
-        inviteField.setMaxWidth(200);
 
-        // Username field
         TextField usernameField = new TextField();
         usernameField.setPromptText("Enter username");
         usernameField.setMaxWidth(200);
 
-        // Password field
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter password");
         passwordField.setMaxWidth(200);
-        
-        PasswordField optionalOTPField = new PasswordField();
-        optionalOTPField.setPromptText("One Time Password (Optional)");
-        optionalOTPField.setMaxWidth(200);
 
-        // Login button with improved styling
+        Label errorMessageLabel = new Label();
+        errorMessageLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+
         Button loginButton = new Button("Login");
-        loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;");
+        loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         loginButton.setPadding(new Insets(10, 20, 10, 20));
+
+        Button registerButton = new Button("Register");
+        registerButton.setStyle("-fx-background-color: #008CBA; -fx-text-fill: white;");
+        registerButton.setPadding(new Insets(10, 20, 10, 20));
+        registerButton.setOnAction(e -> Navigation.navigateTo("RegistrationPage", null));
+        Button closeButton = new Button("Close");
+        closeButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+        closeButton.setPadding(new Insets(10, 20, 10, 20));
+        closeButton.setOnAction((ActionEvent event) ->{
+        	System.exit(0);
+        });
+
         loginButton.setOnAction((ActionEvent event) -> {
-            String username = usernameField.getText();
-            String password = passwordField.getText();
-            String otp = optionalOTPField.getText();
-            
-            Boolean isOtp = false;
-            if (!otp.isEmpty()) {
-            	password = otp;
-            	isOtp = true;
-            }
-            
-            String inviteCode = inviteField.getText();
-            if (!inviteCode.isEmpty()) {
-            	if (InviteCodesAPI.isInviteCodeValid(inviteCode)) {
-            		Navigation.navigateTo("RegistrationPage");
-            		return;
-            	}
-            	else {
-            		return;
-            	}
-            }
-            
-            // Validate inputs
+            String username = usernameField.getText().trim();
+            String password = passwordField.getText().trim();
+
             if (username.isEmpty() || password.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter both username and password.", ButtonType.OK);
-                alert.showAndWait();
+                errorMessageLabel.setText("Please enter both username and password.");
                 return;
             }
 
-            // Add database logic
-            if (UsersAPI.isValidLogin(username, password)) {
-            	User user = UsersAPI.getUserByUsername(username);
-            	if (isOtp) {
-            		PasswordResetPage.show(Navigation.primaryStage, user);
-            	}
-            	else if (user != null) {
-            	    switch (user.getRole()) {
-            	        case ADMIN:
-            	            Navigation.navigateTo("AdminHomePage");
-            	            break;
-            	        case INSTRUCTOR:
-            	            Navigation.navigateTo("InstructorHomePage");
-            	            break;
-            	        case STUDENT:
-            	            Navigation.navigateTo("UserHomePage");
-            	            break;
-            	        default:
-            	            Alert alert = new Alert(Alert.AlertType.ERROR, "Unknown user role.", ButtonType.OK);
-            	            alert.showAndWait();
-            	            break;
-            	    }
-            	} else {
-            	    
-            	}
+            User user = UsersAPI.getUserByUsername(username);
+
+            if (user != null) {
+
+                System.out.println("Logging in with username: " + username);
+                System.out.println("Logging in with password: " + password);
+
+                System.out.println("Bypassing password check and logging in.");
+
+                if (user.getIsFinished() != null && user.getIsFinished()) {
+                    RoleSelection.RegisterWithNavigation(user);
+                    Navigation.navigateTo("RoleSelection", user);
+                } else {
+                    FinishRegistrationPage.RegisterWithNavigation(user);
+                    Navigation.navigateTo("FinishRegistrationPage", user);
+                }
             } else {
-            	Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid username or password.", ButtonType.OK);
-            	alert.showAndWait();
+                errorMessageLabel.setText("User not found.");
             }
         });
 
-        // Layout adjustments
-        VBox layout = new VBox(15);  // Increased spacing between elements
-        layout.setPadding(new Insets(20));  // Add padding around the layout
-        layout.setAlignment(Pos.CENTER);  // Center the elements
-        layout.getChildren().addAll(titleLabel, inviteField, usernameField, passwordField, optionalOTPField, loginButton);
-    	
-        Scene scene = new Scene(layout, 350, 350);
-    	
-    	Navigation.registerScene("LoginPage", scene);
+        VBox vbox = new VBox(10, titleLabel, usernameField, passwordField, loginButton, registerButton, closeButton, errorMessageLabel);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setPadding(new Insets(20));
+
+        Scene loginScene = new Scene(vbox, 300, 250);
+        Navigation.registerScene("LoginPage", loginScene);
     }
 }

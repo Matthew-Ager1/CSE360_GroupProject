@@ -1,75 +1,90 @@
 package Database.Models;
 
-import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.types.ObjectId;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class User {
-    @BsonId
-    private ObjectId id; // MongoDB's unique identifier
-
     private String email;
     private String username;
-    private String password;
-    private String name;
+    private String firstName;
+    private String lastName;
+    private String middleName;
     private boolean onePass;
     private int expire;
-    private Role role; // New field for user roles
-    private List<String> groups; // List of group IDs the user belongs to
+    private Set<Role> roles = new HashSet<>(); // Initialize roles to an empty set
+    private List<String> groups;
+    private String preferredName;
+    private LocalDateTime passwordExpirationDate;
+    private Boolean isFinished; // Add finished status
+    private String password; // Add password field
+    private String id; // Add id field for MongoDB
 
-    // Constructors
-    public User() {}
+    public User() {
+        // Ensure roles is never null
+        this.roles = new HashSet<>();
+    }
 
-    public User(String email, String username, String password, String name, boolean onePass, int expire, Role role, List<String> groups) {
+    public User(String email, String username, String firstName, String lastName, String middleName,
+                boolean onePass, int expire, Set<Role> roles, List<String> groups,
+                String preferredName, LocalDateTime passwordExpirationDate, Boolean isFinished) {
         this.email = email;
         this.username = username;
-        this.password = password;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.middleName = middleName;
         this.onePass = onePass;
         this.expire = expire;
-        this.role = role;
+        this.roles = (roles != null) ? roles : new HashSet<>();
         this.groups = groups;
+        this.preferredName = preferredName;
+        this.passwordExpirationDate = passwordExpirationDate;
+        this.isFinished = isFinished;
     }
 
-    // Getters and Setters
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
+    public String getName() {
+        return firstName + " " + lastName;
     }
 
     public String getEmail() {
         return email;
     }
-    
+
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public String getUsername() {
         return username;
     }
-    
+
     public void setUsername(String username) {
         this.username = username;
     }
-    
-    public String getPassword() {
-        return password;
+
+    public String getFirstName() {
+        return firstName;
     }
-    
-    public void setPassword(String password) {
-        this.password = password;
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
-    
-    public String getName() {
-        return name;
+
+    public String getMiddleName() {
+        return middleName;
     }
-    
-    public void setName(String name) {
-        this.name = name;
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public boolean isOnePass() {
@@ -88,15 +103,12 @@ public class User {
         this.expire = expire;
     }
 
-    public Role getRole() {
-    	if (role == null) {
-    		return Role.STUDENT;
-    	}
-        return role;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRoles(Set<Role> roles) {
+        this.roles = (roles != null) ? roles : new HashSet<>();
     }
 
     public List<String> getGroups() {
@@ -106,5 +118,44 @@ public class User {
     public void setGroups(List<String> groups) {
         this.groups = groups;
     }
-}
 
+    public String getPreferredName() {
+        return preferredName;
+    }
+
+    public void setPreferredName(String preferredName) {
+        this.preferredName = preferredName;
+    }
+
+    public LocalDateTime getPasswordExpirationDate() {
+        return passwordExpirationDate;
+    }
+
+    public void setPasswordExpirationDate(LocalDateTime passwordExpirationDate) {
+        this.passwordExpirationDate = passwordExpirationDate;
+    }
+
+    public Boolean getIsFinished() {
+        return isFinished;
+    }
+
+    public void setIsFinished(Boolean isFinished) {
+        this.isFinished = isFinished;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+}
