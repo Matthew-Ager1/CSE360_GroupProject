@@ -1,41 +1,61 @@
 package Core;
 
-import java.util.*;
-import javafx.stage.*;
-import javafx.scene.*;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import java.util.Stack;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Navigation {
-	public static Stage primaryStage;
-    private static final HashMap<String, Scene> scenes = new HashMap<>();
+    private static Stage primaryStage;
+    private static final Map<String, Scene> scenes = new HashMap<>();
+    private static final Stack<String> sceneHistory = new Stack<>();
+    private static Object currentData; // Store additional data (e.g., User object)
 
-    // Set the primary stage (typically called once from your main application)
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
 
-    // Register a scene with a name for easy retrieval
-    public static void registerScene(String name, Scene scene) {
-        scenes.put(name, scene);
+    public static Stage getPrimaryStage() {
+        return primaryStage;
     }
 
-    // Navigate to a specific scene by name
-    public static void navigateTo(String sceneName) {
+    public static void registerScene(String name, Scene scene) {
+            scenes.put(name, scene);
+    }
+
+    public static void navigateTo(String sceneName, Object data) {
+        currentData = data;
         Scene scene = scenes.get(sceneName);
         if (scene != null) {
+            sceneHistory.push(sceneName);
             primaryStage.setScene(scene);
             primaryStage.show();
         } else {
-            System.out.println("Scene '" + sceneName + "' not found.");
+            System.err.println("Scene '" + sceneName + "' not found.");
         }
     }
 
-    // Optional: Remove a scene if needed
-    public static void removeScene(String name) {
-        scenes.remove(name);
+    public static void goBack() {
+        if (sceneHistory.size() > 1) {
+            sceneHistory.pop();
+            String previousSceneName = sceneHistory.peek();
+            Scene previousScene = scenes.get(previousSceneName);
+            if (previousScene != null) {
+                primaryStage.setScene(previousScene);
+                primaryStage.show();
+            }
+        } else {
+            System.out.println("No previous scene in history.");
+        }
     }
 
-    // Optional: Clear all scenes
+    public static Object getCurrentData() {
+        return currentData;
+    }
+
     public static void clearAllScenes() {
         scenes.clear();
+        sceneHistory.clear();
     }
 }

@@ -46,7 +46,7 @@ public class ArticlesListPage {
                     Article article = getTableView().getItems().get(getIndex());
                     DataHolder.getInstance().setSelectedArticleId(article.getId());
                     //ArticleDetailsPage.RegisterWithNavigation();
-                    Navigation.navigateTo("ArticleDetailsPage");
+                    Navigation.navigateTo("ArticleDetailsPage",null);
                 });
             }
 
@@ -79,3 +79,4 @@ public class ArticlesListPage {
         Navigation.registerScene("ArticlesListPage", scene);
     }
 }
+

@@ -12,8 +12,8 @@ module CSE360_GroupProject {
 	requires org.mongodb.driver.core;
 	requires jbcrypt;
 	requires org.mongodb.bson;
+    requires java.sql;
 	requires junit;
-    
 	exports Core;
 	exports Articles;
 	exports AccountCreation;
