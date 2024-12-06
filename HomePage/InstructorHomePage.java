@@ -1,71 +1,69 @@
 package HomePage;
 
 import Core.Navigation;
-import Database.ArticlesAPI;
-import Database.GroupsAPI;
-import Database.Models.Role;
-import Database.Models.Group;
-import Database.Models.Article;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import Database.Models.User;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-
-import java.util.Arrays;
-import java.util.List;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 
 public class InstructorHomePage {
-    public static void RegisterWithNavigation() {
+	
+	public static void RegisterWithNavigation(User user) {
+		InstructorPanel.RegisterWithNavigation();
+		
         // Title Label
-        Label titleLabel = new Label("Instructor Dashboard");
+        Label titleLabel = new Label("Welcome Instructor " + user.getName() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        titleLabel.setAlignment(Pos.CENTER);
+        
+        // Topic Seach Title
+        Label searchLabel = new Label("Search Topic: ");
+        searchLabel.setStyle("-fx-font-size: 24px;");
+        searchLabel.setAlignment(Pos.CENTER);
 
-        // Manage Articles Button
-        Button manageArticlesButton = new Button("Manage Articles");
-        manageArticlesButton.setMaxWidth(Double.MAX_VALUE);
-        manageArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageArticlesPage");
-        });
-
-        // Backup/Restore Groups Button
-        Button backupRestoreGroupsButton = new Button("Backup/Restore Groups");
-        backupRestoreGroupsButton.setMaxWidth(Double.MAX_VALUE);
-        backupRestoreGroupsButton.setOnAction(e -> {
-            Navigation.navigateTo("BackupRestoreGroupsPage");
-        });
-
-        // Manage Student Access Button
-        Button manageStudentAccessButton = new Button("Manage Student Access");
-        manageStudentAccessButton.setMaxWidth(Double.MAX_VALUE);
-        manageStudentAccessButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageStudentAccessPage");
+        // Topic Search Bar
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search...");
+        searchField.setPrefWidth(250);
+        
+        // Instructor Panel (WIP)
+        Button instructorPanel = new Button("Instructor Panel");
+        instructorPanel.setStyle("-fx-background-color: #ff3232;  -fx-text-fill: white;");
+        instructorPanel.setPadding(new Insets(10, 20, 10, 20));
+        instructorPanel.setOnAction((ActionEvent event) -> {
+            // Open Admin Panel
+        	Navigation.navigateTo("InstructorPanel");
         });
 
         // Logout Button
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
-        logoutButton.setMaxWidth(Double.MAX_VALUE);
-        logoutButton.setOnAction(e -> {
+        logoutButton.setOnAction(event -> {
+            // TODO: Add actual logout logic here
             Navigation.navigateTo("LoginPage");
         });
 
-        // Layout
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(
-                titleLabel,
-                manageArticlesButton,
-                backupRestoreGroupsButton,
-                manageStudentAccessButton,
-                logoutButton
-        );
+        // Top Bar Layout (Search Bar and Logout Button)
+        HBox topBar = new HBox(10);
+        topBar.setPadding(new Insets(10));
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        topBar.getChildren().addAll(searchLabel, searchField, instructorPanel, logoutButton);
 
-        Scene scene = new Scene(layout, 400, 400);
-        Navigation.registerScene("InstructorHomePage", scene);
-    }
+        // Main Layout
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setTop(topBar);
+        mainLayout.setCenter(titleLabel);
+        BorderPane.setAlignment(titleLabel, Pos.CENTER);
+
+        // Scene Setup
+        Scene scene = new Scene(mainLayout, 600, 400);
+        
+        Navigation.registerScene("InstructorHome", scene);
+	}
 }

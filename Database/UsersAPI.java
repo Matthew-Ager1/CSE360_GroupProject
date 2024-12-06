@@ -1,13 +1,12 @@
-package Database;
+package Database; 
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
-import Database.Models.Role;
+
 import Database.Models.User;
+
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,9 @@ public class UsersAPI {
     private static final MongoDatabase database = DatabaseUtil.getDatabase();
     private static final MongoCollection<Document> usersCollection = database.getCollection("Users");
 
-    // Method to add a new user with role and group memberships
+    // All new methods in this class are private!!!
+    
+    // Method to add a new user
     public static Boolean addUser(User user) {
         try {
             // Check if username or email already exists
@@ -29,11 +30,6 @@ public class UsersAPI {
             String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
             user.setPassword(hashedPassword);
             
-            // Initialize groups if null
-            if (user.getGroups() == null) {
-                user.setGroups(new ArrayList<>());
-            }
-            
             Document userDoc = userToDocument(user);
             usersCollection.insertOne(userDoc);
             return true;
@@ -43,7 +39,6 @@ public class UsersAPI {
         return false;
     }
     
-    // Method to validate user login
     public static Boolean isValidLogin(String username, String password) {
         try {
             Document userDoc = getUserDocumentByUsername(username);
@@ -58,21 +53,110 @@ public class UsersAPI {
         return false;
     }
 
-    // Method to retrieve user by username
-    public static User getUserByUsername(String username) {
+    // Private method to check if a username exists
+    private static Boolean usernameExists(String username) {
         try {
-            Document userDoc = getUserDocumentByUsername(username);
-            if (userDoc != null) {
-                return documentToUser(userDoc);
-            }
+            Document userDoc = usersCollection.find(new Document("username", username)).first();
+            return userDoc != null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Private method to check if an email exists
+    private static Boolean emailExists(String email) {
+        try {
+            Document userDoc = usersCollection.find(new Document("email", email)).first();
+            return userDoc != null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Private method to get user Document by username
+    private static Document getUserDocumentByUsername(String username) {
+        try {
+            return usersCollection.find(new Document("username", username)).first();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    
-    // Method to retrieve all users
-    public static List<User> getAllUsers() {
+
+    // Private method to get user Document by email
+    private static Document getUserDocumentByEmail(String email) {
+        try {
+            return usersCollection.find(new Document("email", email)).first();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Private method to convert Document to User object
+    private static User documentToUser(Document doc) {
+        User user = new User();
+        user.setEmail(doc.getString("email"));
+        user.setUsername(doc.getString("username"));
+        user.setPassword(doc.getString("password"));
+        user.setName(doc.getString("name"));
+        user.setOnePass(doc.getBoolean("one_pass", false));
+        //user.setExpire(doc.getDate("expire"));
+        //user.setPerms(doc.getList("perms", String.class));
+        return user;
+    }
+
+    // Private method to convert User object to Document
+    private static Document userToDocument(User user) {
+        Document userDoc = new Document("email", user.getEmail())
+                            .append("username", user.getUsername())
+                            .append("password", user.getPassword())
+                            .append("name", user.getName())
+                            .append("one_pass", user.isOnePass())
+                            .append("expire", user.getExpire())
+                            .append("perms", user.getPerms());
+        return userDoc;
+    }
+
+    // Private method to update a user's field
+    private static Boolean updateUserField(String username, String fieldName, Object value) {
+        try {
+            Document update = new Document("$set", new Document(fieldName, value));
+            usersCollection.updateOne(new Document("username", username), update);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Private method to delete a user by username
+    private static Boolean deleteUserByUsername(String username) {
+        try {
+            usersCollection.deleteOne(new Document("username", username));
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Private method to change a user's password
+    private static Boolean changeUserPassword(String username, String newPassword) {
+        try {
+            // Hash the new password before storing
+            String hashedPassword = PasswordUtil.hashPassword(newPassword);
+            return updateUserField(username, "password", hashedPassword);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Private method to get all users
+    private static List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try {
             for (Document doc : usersCollection.find()) {
@@ -84,50 +168,25 @@ public class UsersAPI {
         return users;
     }
 
-    // Method to add a user to a group
-    public static Boolean addUserToGroup(String username, String groupName) {
+    // Private method to check if user has a specific permission
+    private static Boolean userHasPermission(String username, String permission) {
         try {
-            Bson filter = Filters.eq("username", username);
-            Bson update = Updates.addToSet("groups", groupName);
-            usersCollection.updateOne(filter, update);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // Method to remove a user from a group
-    public static Boolean removeUserFromGroup(String username, String groupName) {
-        try {
-            Bson filter = Filters.eq("username", username);
-            Bson update = Updates.pull("groups", groupName);
-            usersCollection.updateOne(filter, update);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // Method to retrieve users by group
-    public static List<User> getUsersByGroup(String groupName) {
-        List<User> users = new ArrayList<>();
-        try {
-            Bson filter = Filters.in("groups", groupName);
-            for (Document doc : usersCollection.find(filter)) {
-                users.add(documentToUser(doc));
+            Document userDoc = getUserDocumentByUsername(username);
+            if (userDoc != null) {
+                List<String> perms = userDoc.getList("perms", String.class);
+                return perms != null && perms.contains(permission);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return users;
+        return false;
     }
 
-    // Method to delete a user by username
-    public static Boolean deleteUserByUsername(String username) {
+    // Private method to add a permission to a user
+    private static Boolean addPermissionToUser(String username, String permission) {
         try {
-            usersCollection.deleteOne(new Document("username", username));
+            Document update = new Document("$addToSet", new Document("perms", permission));
+            usersCollection.updateOne(new Document("username", username), update);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,76 +194,15 @@ public class UsersAPI {
         return false;
     }
 
-    // Method to update a user's role
-    public static Boolean updateUserRole(String username, Role newRole) {
+    // Private method to remove a permission from a user
+    private static Boolean removePermissionFromUser(String username, String permission) {
         try {
-            Bson filter = Filters.eq("username", username);
-            Bson update = Updates.set("role", newRole.toString());
-            usersCollection.updateOne(filter, update);
+            Document update = new Document("$pull", new Document("perms", permission));
+            usersCollection.updateOne(new Document("username", username), update);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
-    }
-
-    // Private helper methods
-
-    private static Boolean usernameExists(String username) {
-        try {
-            Document userDoc = usersCollection.find(new Document("username", username)).first();
-            return userDoc != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private static Boolean emailExists(String email) {
-        try {
-            Document userDoc = usersCollection.find(new Document("email", email)).first();
-            return userDoc != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private static Document getUserDocumentByUsername(String username) {
-        try {
-            return usersCollection.find(new Document("username", username)).first();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static User documentToUser(Document doc) {
-        User user = new User();
-        user.setId(doc.getObjectId("_id"));
-        user.setEmail(doc.getString("email"));
-        user.setUsername(doc.getString("username"));
-        user.setPassword(doc.getString("password"));
-        user.setName(doc.getString("name"));
-        user.setOnePass(doc.getBoolean("onePass", false));
-        user.setExpire(doc.getInteger("expire", 0));
-        String roleStr = doc.getString("role");
-        if (roleStr != null) {
-            user.setRole(Role.valueOf(roleStr));
-        }
-        user.setGroups((List<String>) doc.get("groups"));
-        return user;
-    }
-
-    private static Document userToDocument(User user) {
-        Document userDoc = new Document("email", user.getEmail())
-                            .append("username", user.getUsername())
-                            .append("password", user.getPassword())
-                            .append("name", user.getName())
-                            .append("onePass", user.isOnePass())
-                            .append("expire", user.getExpire())
-                            .append("role", user.getRole().toString())
-                            .append("groups", user.getGroups());
-        return userDoc;
     }
 }

@@ -2,7 +2,6 @@ package Database.Models;
 
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.types.ObjectId;
-import java.util.List;
 
 public class User {
     @BsonId
@@ -11,24 +10,22 @@ public class User {
     private String email;
     private String username;
     private String password;
-    private String name;
+    private String name; // Assuming 'name' is a simple String
     private boolean onePass;
     private int expire;
-    private Role role; // New field for user roles
-    private List<String> groups; // List of group IDs the user belongs to
+    private int perms;
 
     // Constructors
     public User() {}
 
-    public User(String email, String username, String password, String name, boolean onePass, int expire, Role role, List<String> groups) {
+    public User(String email, String username, String password, String name, boolean onePass, int expire, int perms) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.name = name;
         this.onePass = onePass;
         this.expire = expire;
-        this.role = role;
-        this.groups = groups;
+        this.perms = perms;
     }
 
     // Getters and Setters
@@ -88,23 +85,11 @@ public class User {
         this.expire = expire;
     }
 
-    public Role getRole() {
-    	if (role == null) {
-    		return Role.STUDENT;
-    	}
-        return role;
+    public int getPerms() {
+        return perms;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public List<String> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<String> groups) {
-        this.groups = groups;
+    public void setPerms(int perms) {
+        this.perms = perms;
     }
 }
-

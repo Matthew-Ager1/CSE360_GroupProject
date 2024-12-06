@@ -19,18 +19,17 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+// import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 
-import Articles.ArticleDetailsPage;
-import Articles.ArticleSearchPage;
-import Articles.ArticlesListPage;
-import HomePage.*;
+import AccountCreation.RegistrationPage;
+import HomePage.AdminHomePage;
 import LoginPage.LoginPage;
-import javafx.scene.layout.Pane;
+
 
 public class Main extends Application {
 	
+	//private static final Users Users = new Users();
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -38,37 +37,6 @@ public class Main extends Application {
 		Navigation.setPrimaryStage(baseStage);
 		
 		LoginPage.RegisterWithNavigation();
-		
-		//UserHomePage.RegisterWithNavigation();
-		//InstructorHomePage.RegisterWithNavigation();
-		
-		
-		try {
-			ArticlesListPage.RegisterWithNavigation();
-		} catch (InterruptedException e) {
-
-		} catch (ExecutionException e) {
-
-		}
-        ArticleDetailsPage.RegisterWithNavigation();
-        try {
-			ArticleSearchPage.RegisterWithNavigation();
-		} catch (InterruptedException e) {
-
-		} catch (ExecutionException e) {
-
-		}
-        
-        ManageArticlesPage.RegisterWithNavigation();
-        ManageGroupsPage.RegisterWithNavigation();
-        ManageUsersPage.RegisterWithNavigation();
-        AdminHomePage.RegisterWithNavigation();
-        InstructorHomePage.RegisterWithNavigation();
-        
-		
-		
-	    //AccountCreationUI.RegisterWithNavigation(baseStage);
-		
-        Navigation.navigateTo("ManageArticlesPage");
+		Navigation.navigateTo("LoginPage");
     }
 }

@@ -1,77 +1,68 @@
 package HomePage;
 
 import Core.Navigation;
+import Database.Models.User;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 
 public class AdminHomePage {
-    public static void RegisterWithNavigation() {
+	public static void RegisterWithNavigation(User user) {
+		AdminPanel.RegisterWithNavigation();
+		
         // Title Label
-        Label titleLabel = new Label("Admin Dashboard");
+        Label titleLabel = new Label("Welcome Admin " + user.getName() + "!");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        titleLabel.setAlignment(Pos.CENTER);
+        
+        // Topic Seach Title
+        Label searchLabel = new Label("Search Topic: ");
+        searchLabel.setStyle("-fx-font-size: 24px;");
+        searchLabel.setAlignment(Pos.CENTER);
 
-        // Manage Groups Button
-        Button manageGroupsButton = new Button("Manage Groups");
-        manageGroupsButton.setMaxWidth(Double.MAX_VALUE);
-        manageGroupsButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageGroupsPage");
-        });
-
-        // Manage Users Button
-        Button manageUsersButton = new Button("Manage Users");
-        manageUsersButton.setMaxWidth(Double.MAX_VALUE);
-        manageUsersButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageUsersPage");
-        });
-
-        // Manage Help Articles Button
-        Button manageHelpArticlesButton = new Button("Manage Help Articles");
-        manageHelpArticlesButton.setMaxWidth(Double.MAX_VALUE);
-        manageHelpArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("ManageHelpArticlesPage");
-        });
-
-        // Backup Articles Button
-        Button backupArticlesButton = new Button("Backup Articles");
-        backupArticlesButton.setMaxWidth(Double.MAX_VALUE);
-        backupArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("BackupArticlesPage");
-        });
-
-        // Restore Articles Button
-        Button restoreArticlesButton = new Button("Restore Articles");
-        restoreArticlesButton.setMaxWidth(Double.MAX_VALUE);
-        restoreArticlesButton.setOnAction(e -> {
-            Navigation.navigateTo("RestoreArticlesPage");
+        // Topic Search Bar
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search...");
+        searchField.setPrefWidth(250);
+        
+        // Admin Panel (WIP)
+        Button adminPanel = new Button("Admin Panel");
+        adminPanel.setStyle("-fx-background-color: #ff3232;  -fx-text-fill: white;");
+        adminPanel.setPadding(new Insets(10, 20, 10, 20));
+        adminPanel.setOnAction((ActionEvent event) -> {
+            // Open Admin Panel
+        	Navigation.navigateTo("AdminPanel");
         });
 
         // Logout Button
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
-        logoutButton.setMaxWidth(Double.MAX_VALUE);
-        logoutButton.setOnAction(e -> {
+        logoutButton.setOnAction(event -> {
+            // TODO: Add actual logout logic here
             Navigation.navigateTo("LoginPage");
         });
 
-        // Layout
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(
-                titleLabel,
-                manageGroupsButton,
-                manageUsersButton,
-                manageHelpArticlesButton,
-                backupArticlesButton,
-                restoreArticlesButton,
-                logoutButton
-        );
+        // Top Bar Layout (Search Bar and Logout Button)
+        HBox topBar = new HBox(10);
+        topBar.setPadding(new Insets(10));
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+        topBar.getChildren().addAll(searchLabel, searchField, adminPanel, logoutButton);
 
-        Scene scene = new Scene(layout, 400, 400);
-        Navigation.registerScene("AdminHomePage", scene);
-    }
+        // Main Layout
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setTop(topBar);
+        mainLayout.setCenter(titleLabel);
+        BorderPane.setAlignment(titleLabel, Pos.CENTER);
+
+        // Scene Setup
+        Scene scene = new Scene(mainLayout, 600, 400);
+        
+        Navigation.registerScene("AdminHome", scene);
+	}
 }
